@@ -1,11 +1,11 @@
 package snpverify
 
-// Security regression cases for findings documented in REVIEW.md.
+// Regression cases: policy validation, input ownership, certificate purpose, CRL rules, masked CHIP_ID, VLEK. Mirrors ts/test/regression.test.ts.
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class SecurityReviewTest {
+class RegressionTest {
     private fun fixture(name: String = "200-real-sev-snp-happy"): VerifyInput {
         val x = Fixtures.json(Fixtures.vectors.resolve("attestation-sev/$name/input.json"))
         return VerifyInput(

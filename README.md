@@ -90,7 +90,6 @@ A `Policy` lists the conditions a report must satisfy. The fields fall into four
 CXL bits, require VMPL 0, require the committed firmware to equal the running firmware, forbid an
 ID block and accept the products Genoa and Turin. Every other field defaults to `any`. The
 resolved policy is part of the result as `attestation.policyApplied`. SPEC §5 lists every field.
-[MITIGATIONS.md](MITIGATIONS.md) lists published attacks and the field that addresses each.
 
 `baseVcekPolicy` and `baseVlekPolicy` build a policy from four deployment values: the products,
 the measurements, the session binding and the TCB floors. They set `minReportVersion` 3,
@@ -102,28 +101,24 @@ Three values must be produced by the caller for every verification. The session 
 clock the caller trusts. The VCEK, the certificate chain and the CRL are fetched by the caller,
 and the CRL is refreshed before its `nextUpdate`.
 
+## Mitigations
+
+[MITIGATIONS.md](MITIGATIONS.md) is a table of published attacks on SEV-SNP. Each row gives the
+paper or disclosure, the AMD security bulletin and CVE where one exists, the `Policy` field that
+addresses the attack, and the products on which that field is available. The rows cover
+microcode and firmware vulnerabilities (CacheWarp, EntrySign, StackWarp, RMPocalypse, Fabricked,
+the SB-3007, SB-3011 and SB-3016 series), memory attacks (BadRAM, CipherLeaks, Heracles, PwrLeak,
+CounterSEVeillance), guest-kernel attacks that only a measurement allowlist addresses (Heckler,
+WeSee, BadAML), protocol conditions (replay, relay, host-requested reports, revoked keys, firmware
+rollback), the Milan root-seed extraction, and the attacks the report cannot show (memory
+interposers, cache side channels). The document ends with a complete policy, dated, that sets
+every field named in the table, in both languages.
+
 ## Acknowledgement
 
 The design draws on the author's work with [Tinfoil](https://tinfoil.sh) on attestation
 verification. The conformance vectors in `vectors/attestation-sev` and `vectors/quote-sev` come
 from that work.
-
-## Continuous integration
-
-`.github/workflows/ci.yml` runs on every push and pull request. The TypeScript job runs ESLint,
-the type check, Vitest, the build and the Playwright browser tests. The Kotlin job runs ktlint,
-detekt and the test suite on JDK 21. `jitpack.yml` builds the Kotlin artifact from a tag.
-
-## Layout
-
-```
-SPEC.md          interface, checks, error codes
-MITIGATIONS.md   published attacks and the policy field that addresses each
-SECURITY-REVIEW.md  review findings and the behaviour verified by the regression tests
-vectors/         Tinfoil conformance vectors, KDS snapshot, review fixtures, cross-port expected results
-ts/src           bytes der report products roots crypto chain bind policy attestation base-policies index
-kotlin/src       the same files, same names
-```
 
 ## License
 

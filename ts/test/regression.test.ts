@@ -1,4 +1,4 @@
-// Regression cases for the findings in SECURITY-REVIEW.md. Test certificates are generated and signed in-process.
+// Regression cases: policy validation, input ownership, certificate purpose, CRL rules, masked CHIP_ID, VLEK. Test certificates are generated and signed in-process.
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';

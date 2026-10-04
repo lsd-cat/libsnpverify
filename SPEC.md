@@ -197,12 +197,13 @@ Each port runs:
 
 - the Tinfoil `attestation-sev` vectors (48) and `quote-sev` vectors (13);
 - mutation tests on the real Genoa report in `attestation-sev/200`;
-- the security-review cases, with fixtures in `vectors/review/`;
+- regression cases for policy validation, input ownership and certificate rules, with fixtures
+  in `vectors/review/`;
 - the cross-port golden result `vectors/golden/real-genoa.json`;
 - the cross-port violation vector `vectors/expected-violations.json` (stage, code, field and
   message for twenty rejections).
 
-The TypeScript tests write the review fixtures, the golden result and the violation vector when
+The TypeScript tests write the regression fixtures, the golden result and the violation vector when
 the files are absent, or when the environment variable `SNP_VECTORS_REGEN` is set. `vectors/kds/`
 is a snapshot of the AMD Key Distribution Service certificate chains and CRLs taken on
 2026-10-04. `ts/scripts/fetch-roots.mjs` regenerates the embedded root certificates from the
