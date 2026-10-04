@@ -1,0 +1,16 @@
+id: 264-platform-info-tsme-not-set
+stage: verify-attestation-sev
+title: |
+  PLATFORM_INFO with TSME_EN=0 must reject (SPEC §3.7.2 #10, default requires TSME).
+spec_refs: ["3.7.2", "3.2.3"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  platform_info = 0x01 (SMT_EN=1, TSME_EN=0). §3.7.1's default platform info sets
+  tsme_enabled=true, so §3.7.2 #10 requires TSME to be reported. Must reject. An
+  SDK whose conformance path never validates PLATFORM_INFO accepts.

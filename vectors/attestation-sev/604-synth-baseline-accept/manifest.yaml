@@ -1,0 +1,18 @@
+id: 604-synth-baseline-accept
+stage: verify-attestation-sev
+title: |
+  Synth chain + clean policy report (SMT+MBO only) verifies → accepted.
+spec_refs: ["3.2.2", "3.7"]
+expects:
+  exit_code: 0
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-baseline
+notes: |
+  Sanity-companion to fixtures 600-603. Synth chain + synth report
+  with the minimal-correct guest_policy (bits 16+17 = SMT+MBO only,
+  no DEBUG/MIGRATE/reserved-MBZ) — the SDK MUST accept. Confirms
+  the negative fixtures fail on policy alone, not on a defect in
+  the synth chain.

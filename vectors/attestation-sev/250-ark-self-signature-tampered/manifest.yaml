@@ -1,0 +1,18 @@
+id: 250-ark-self-signature-tampered
+stage: verify-attestation-sev
+title: |
+  Injected AMD root (ARK) with an invalid self-signature must reject (SPEC §3.3.1).
+spec_refs: ["3.3.1", "3.3.5"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-chain-integrity
+notes: |
+  The persisted synth ARK cert with one byte flipped inside its RSA
+  signatureValue — the public key is intact (so ASK still chains to it by key),
+  but the root's self-signature is invalid. A verifier that validates the trust
+  root rejects; one that blindly trusts the injected/pinned root accepts. Probes
+  whether the SDK actually checks the AMD root.

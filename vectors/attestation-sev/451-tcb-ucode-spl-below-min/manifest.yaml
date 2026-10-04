@@ -1,0 +1,16 @@
+id: 451-tcb-ucode-spl-below-min
+stage: verify-attestation-sev
+title: |
+  policy.min_tcb_ucode_spl above actual current_tcb.ucode_spl → TCB_OUT_OF_DATE.
+spec_refs: ["3.7"]
+expects:
+  exit_code: 10
+  rejection_code: "TCB_OUT_OF_DATE"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.extended_checks_supported: true
+fixture_kind: real-frozen-bundle-policy-pin
+notes: |
+  Real bundle has current_tcb.ucode_spl=84. Pin minimum=200. Per
+  SPEC §3.7 → TCB_OUT_OF_DATE. Parallels fixture 450.

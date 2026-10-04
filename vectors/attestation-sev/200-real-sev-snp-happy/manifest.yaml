@@ -1,0 +1,42 @@
+id: 200-real-sev-snp-happy
+stage: verify-attestation-sev
+title: |
+  Real AMD-signed SEV-SNP v3 Genoa attestation verifies with embedded ARK||ASK.
+spec_refs: ["3", "3.1", "3.3", "3.6"]
+expects:
+  exit_code: 0
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+fixture_kind: real-frozen-bundle
+public_api_variant: true
+notes: |
+  Phase 1 happy path — the foundation fixture for verify-attestation-sev.
+  
+  Sourced from a real Tinfoil Genoa enclave's attestation bundle
+  (staged at vectors/attestation-sev/_assets/real_genoa_bundle.json).
+  The 1184-byte SEV-SNP v3 report is gzip+base64-encoded; the
+  matching VCEK certificate is DER-encoded and signed by AMD's real
+  Genoa SEV Key, with the ARK||ASK chain served from the SDK's
+  embedded Genoa cert_chain trust store (no AMD KDS network call).
+  
+  expiration_check_date_unix = 1780272000 (2026-06-01 00:00:00 UTC)
+  is inside the VCEK validity window (2026-01-11 .. 2033-01-11).
+  
+  Notable body fields (parser sanity check):
+    * version          = 3            (SEV-SNP SPEC §3.1)
+    * debug bit        = 0            (production enclave; trustable)
+    * reserved_mbo     = 1            (guest_policy bit 17 must be 1)
+    * migrate_ma       = 0            (no migration allowed)
+    * single_socket    = 0            (multi-socket Genoa)
+    * smt              = 1            (SMT allowed per policy)
+    * smt_en/tsme_en/ecc_en = 1       (platform_info: SMT+TSME+ECC)
+  
+  Pinned outputs cover the measurement (SPEC §7.1 single register)
+  and all decoded body fields. host_data / report_data / chip_id are
+  deterministic from the report bytes and pinned in expected.json.
+  qv_result-style status codes don't apply to SEV-SNP — once the
+  VCEK chain + report signature verify, success is binary.
+  
+  Gated on attestation_sev.supported. tinfoil-go declares true
+  (google/go-sev-guest). Python and JS are wired in P1's Phase 1B/1C.

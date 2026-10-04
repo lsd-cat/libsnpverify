@@ -1,0 +1,17 @@
+id: 220-signature-byte-flipped
+stage: verify-attestation-sev
+title: |
+  VCEK report signature first byte flipped → must reject as REPORT_SIGNATURE_INVALID.
+spec_refs: ["3.6"]
+expects:
+  exit_code: 10
+  rejection_code: "REPORT_SIGNATURE_INVALID"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+fixture_kind: synthetic-mutation
+notes: |
+  Flips byte 0x2A0 (first byte of the ECDSA P-384 signature). Per
+  SPEC §3.6 the SDK MUST verify the report's signature over bytes
+  0..0x2A0 with the VCEK public key. Any mutation in the signature
+  field surfaces as REPORT_SIGNATURE_INVALID.

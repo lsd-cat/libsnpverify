@@ -1,0 +1,19 @@
+id: 211-truncated-report
+stage: verify-attestation-sev
+title: |
+  Report truncated to 1183 bytes → must reject as REPORT_TRUNCATED.
+spec_refs: ["3.1"]
+expects:
+  exit_code: 10
+  rejection_code: ["REPORT_TRUNCATED", "REPORT_FORMAT_UNSUPPORTED"]
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+fixture_kind: synthetic-mutation
+notes: |
+  Truncates the report by one byte (1184 → 1183). Per SPEC §3.1 a
+  SEV-SNP attestation report MUST be exactly 1184 bytes (16-byte
+  fixed prefix + 1168-byte body). SDKs that detect the wrong length
+  before parsing emit REPORT_TRUNCATED; those that try to parse and
+  fail emit REPORT_FORMAT_UNSUPPORTED. List-form rejection_code
+  captures the divergence.

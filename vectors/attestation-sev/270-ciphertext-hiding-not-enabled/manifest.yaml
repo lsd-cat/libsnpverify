@@ -1,0 +1,19 @@
+id: 270-ciphertext-hiding-not-enabled
+stage: verify-attestation-sev
+title: |
+  PLATFORM_INFO CIPHERTEXT_HIDING_EN=0 (CipherLeaks): no spec mandate; probe fails uniformly to show the gap.
+spec_refs: ["3.7.1", "3.2.3"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  platform_info = 0x23 (SMT+TSME+ALIAS_CHECK set, CIPHERTEXT_HIDING_EN bit4 clear)
+  — every other hardening bit set, isolating ciphertext-hiding. CipherLeaks
+  (ASPLOS'21) is a ciphertext side-channel mitigated by DRAM ciphertext hiding.
+  NO current spec clause requires it (§3.7.1 default = not required), so all four
+  SDKs accept. Expected=reject encodes the hardened stance; this probe fails
+  uniformly today to surface the gap. DECIDE-LATER: mandate CIPHERTEXT_HIDING_EN.

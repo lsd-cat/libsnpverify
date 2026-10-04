@@ -1,0 +1,17 @@
+id: 420-report-data-pin-mismatch
+stage: verify-attestation-sev
+title: |
+  policy.expected_report_data_hex mismatch → REPORT_DATA_MISMATCH.
+spec_refs: ["8.2"]
+expects:
+  exit_code: 10
+  rejection_code: "REPORT_DATA_MISMATCH"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.extended_checks_supported: true
+fixture_kind: real-frozen-bundle-policy-pin
+notes: |
+  Real bundle has report_data=71c31f...8603d. Pin first hex char
+  flipped (f1c31f...). Per SPEC §8.2 report_data carries the TLS
+  pubkey FP + HPKE pubkey binding; pin mismatch → REPORT_DATA_MISMATCH.

@@ -1,0 +1,18 @@
+id: 430-id-key-digest-pin-mismatch
+stage: verify-attestation-sev
+title: |
+  policy.expected_id_key_digest_hex mismatch → ID_KEY_DIGEST_MISMATCH.
+spec_refs: ["3.1.1"]
+expects:
+  exit_code: 10
+  rejection_code: "ID_KEY_DIGEST_MISMATCH"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.extended_checks_supported: true
+fixture_kind: real-frozen-bundle-policy-pin
+notes: |
+  Real bundle has id_key_digest=0x00*48 (no ID block). Pin a
+  non-zero digest → ID_KEY_DIGEST_MISMATCH per SPEC §3.1.1.
+  Use case: a fixture pinning ID block fingerprint catches an
+  enclave that wasn't launched with the expected signing key.

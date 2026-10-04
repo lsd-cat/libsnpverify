@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>libsnpverify browser test</title>
+<script type="module">
+  import { SnpVerifier, fromBase64, pemToDer, parseCrl, toJson } from '/ts/dist/index.js';
+  const get = async (p, kind) => { const r = await fetch(p); return kind === 'json' ? r.json() : kind === 'text' ? r.text() : new Uint8Array(await r.arrayBuffer()); };
+  const gunzip = async (b) => new Uint8Array(await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+  try {
+    const input = await get('/vectors/attestation-sev/200-real-sev-snp-happy/input.json', 'json');
+    const report = await gunzip(fromBase64(input.attestation_doc_b64));
+    const crl = await get('/vectors/kds/Genoa.crl');
+    const [ask, ark] = pemToDer(await get('/vectors/kds/Genoa.cert_chain.pem', 'text'));
+    const verifier = new SnpVerifier();
+    const policy = { measurement: [report.slice(0x90, 0xc0)], products: ['Genoa'], requireCrl: true };
+    const ok = await verifier.verify({ report, vcek: fromBase64(input.vcek_der_b64), ask, ark, crl, now: parseCrl(crl).thisUpdate + 60, policy });
+    const bad = report.slice(); bad[0x2a0] ^= 1;
+    const rejected = await verifier.verify({ report: bad, vcek: fromBase64(input.vcek_der_b64), ask, ark, crl, now: parseCrl(crl).thisUpdate + 60, policy });
+    window.__result = { ok: toJson(ok), rejected: toJson(rejected) };
+  } catch (e) { window.__result = { error: String(e && e.stack || e) }; }
+</script>

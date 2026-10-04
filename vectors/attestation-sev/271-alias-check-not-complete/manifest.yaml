@@ -1,0 +1,21 @@
+id: 271-alias-check-not-complete
+stage: verify-attestation-sev
+title: |
+  PLATFORM_INFO ALIAS_CHECK_COMPLETE=0 (badRAM): no spec mandate; probe fails uniformly to show the gap.
+spec_refs: ["3.7.1", "3.2.3"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  platform_info = 0x13 (SMT+TSME+CIPHERTEXT_HIDING set, ALIAS_CHECK_COMPLETE bit5
+  clear), isolating the alias-check requirement. badRAM (USENIX Security'25)
+  aliases DRAM to break SEV-SNP integrity; AMD's mitigation reports
+  ALIAS_CHECK_COMPLETE=1 once the platform verifies no aliasing. NO current spec
+  clause requires it, so all four SDKs accept. Expected=reject encodes the
+  hardened stance; fails uniformly today to surface the gap. tinfoil-js has the
+  check (validation.ts:403) but defaults required.aliasCheckComplete=false.
+  DECIDE-LATER: mandate ALIAS_CHECK_COMPLETE.

@@ -1,0 +1,10 @@
+{
+  "stage": "verify-attestation-sev",
+  "accepted": false,
+  "rejection": {
+    "code": [
+      "REPORT_TRUNCATED",
+      "REPORT_FORMAT_UNSUPPORTED"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+id: 460-measurement-pin-match
+stage: verify-attestation-sev
+title: |
+  policy.expected_measurement_hex equals report measurement → accepted.
+spec_refs: ["3.8"]
+expects:
+  exit_code: 0
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.extended_checks_supported: true
+fixture_kind: real-frozen-bundle-policy-pin
+notes: |
+  Positive-accept companion to 400. Pins the exact measurement
+  the report carries — confirms SDKs actually run the pin check
+  (not just always-accept when set). Required for cross-SDK
+  extended_checks_supported parity.

@@ -1,0 +1,17 @@
+id: 602-synth-reserved-mbz-set
+stage: verify-attestation-sev
+title: |
+  Synth report with guest_policy bit 30 (reserved-MBZ) set → GUEST_POLICY_RESERVED_BIT_SET.
+spec_refs: ["3.2.2", "3.7"]
+expects:
+  exit_code: 10
+  rejection_code: "GUEST_POLICY_RESERVED_BIT_SET"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-violation
+notes: |
+  Bits 25..63 of guest_policy are reserved-must-be-zero per
+  AMD APM Vol 3 Table B-3. Setting bit 30 forces the
+  enforce_spec_defaults reserved-MBZ check to reject.

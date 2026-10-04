@@ -1,0 +1,217 @@
+{
+ "flipped-signature": {
+  "stage": "signature",
+  "violations": [
+   {
+    "code": "REPORT_SIGNATURE_INVALID",
+    "message": "report signature does not verify with the VCEK",
+    "field": "signature"
+   }
+  ]
+ },
+ "flipped-reported-tcb": {
+  "stage": "bind",
+  "violations": [
+   {
+    "code": "VCEK_TCB_MISMATCH",
+    "message": "reported_tcb does not match the VCEK certificate TCB",
+    "field": "reported_tcb"
+   }
+  ]
+ },
+ "flipped-chip-id": {
+  "stage": "bind",
+  "violations": [
+   {
+    "code": "VCEK_HWID_MISMATCH",
+    "message": "chip_id 1bf1aa6c1f56037a05849a59b8815cf909583f9ba9ef2f053218c437f33ba183e4e415b039b37f8205250ad15f8b88a0a3add9f4c081c0779a48ed2214378e44 != VCEK HWID 1af1aa6c1f56037a05849a59b8815cf909583f9ba9ef2f053218c437f33ba183e4e415b039b37f8205250ad15f8b88a0a3add9f4c081c0779a48ed2214378e44",
+    "field": "chip_id"
+   }
+  ]
+ },
+ "trailing-byte": {
+  "stage": "parse",
+  "violations": [
+   {
+    "code": "REPORT_TRUNCATED",
+    "message": "report is 1185 bytes, want 1184"
+   }
+  ]
+ },
+ "version-6": {
+  "stage": "parse",
+  "violations": [
+   {
+    "code": "REPORT_VERSION_UNSUPPORTED",
+    "message": "report version 6",
+    "field": "version"
+   }
+  ]
+ },
+ "host-requested": {
+  "stage": "parse",
+  "violations": [
+   {
+    "code": "REPORT_HOST_REQUESTED",
+    "message": "report was requested by the host (VMPL=0xFFFFFFFF), not by the guest",
+    "field": "vmpl"
+   }
+  ]
+ },
+ "reserved-byte": {
+  "stage": "parse",
+  "violations": [
+   {
+    "code": "REPORT_MALFORMED",
+    "message": "reserved bytes 0x4c..0x50 not zero"
+   }
+  ]
+ },
+ "flipped-vcek": {
+  "stage": "chain",
+  "violations": [
+   {
+    "code": "CHAIN_SIGNATURE_INVALID",
+    "message": "VCEK not signed by ASK"
+   }
+  ]
+ },
+ "untrusted-root": {
+  "stage": "chain",
+  "violations": [
+   {
+    "code": "ARK_UNTRUSTED",
+    "message": "root certificate is not a trusted ARK"
+   }
+  ]
+ },
+ "expired": {
+  "stage": "chain",
+  "violations": [
+   {
+    "code": "CERT_EXPIRED",
+    "message": "VCEK expired at 2033-01-11T16:38:56Z"
+   }
+  ]
+ },
+ "not-yet-valid": {
+  "stage": "chain",
+  "violations": [
+   {
+    "code": "CERT_NOT_YET_VALID",
+    "message": "ARK not valid before 2022-01-26T15:34:37Z"
+   }
+  ]
+ },
+ "flipped-crl": {
+  "stage": "chain",
+  "violations": [
+   {
+    "code": "CRL_INVALID",
+    "message": "CRL signature invalid"
+   }
+  ]
+ },
+ "crl-absent": {
+  "stage": "policy",
+  "violations": [
+   {
+    "code": "POLICY_INVALID",
+    "message": "policy requires a CRL but none was supplied"
+   }
+  ]
+ },
+ "measurement-mismatch": {
+  "stage": "policy",
+  "violations": [
+   {
+    "code": "POLICY_MEASUREMENT_MISMATCH",
+    "message": "measurement 09ef32acf90fcfeb6206d1a46c13145cef736ebbb83f18eaff680b686232031546ff5fd39c44599699ee8734cbbeb519 not in allowlist",
+    "field": "measurement"
+   }
+  ]
+ },
+ "report-data-prefix-mismatch": {
+  "stage": "policy",
+  "violations": [
+   {
+    "code": "POLICY_REPORT_DATA_MISMATCH",
+    "message": "report_data does not start with 0000000000000000000000000000000000000000000000000000000000000000",
+    "field": "report_data"
+   }
+  ]
+ },
+ "chip-id-not-allowed": {
+  "stage": "policy",
+  "violations": [
+   {
+    "code": "POLICY_CHIP_ID_NOT_ALLOWED",
+    "message": "chip_id 1af1aa6c1f56037a05849a59b8815cf909583f9ba9ef2f053218c437f33ba183e4e415b039b37f8205250ad15f8b88a0a3add9f4c081c0779a48ed2214378e44 not in allowlist",
+    "field": "chip_id"
+   }
+  ]
+ },
+ "product-not-allowed": {
+  "stage": "policy",
+  "violations": [
+   {
+    "code": "POLICY_PRODUCT_NOT_ALLOWED",
+    "message": "product Genoa not in [Turin]"
+   }
+  ]
+ },
+ "several-policy-violations": {
+  "stage": "policy",
+  "violations": [
+   {
+    "code": "POLICY_GUEST_POLICY",
+    "message": "guest_policy.smt is set but forbidden",
+    "field": "guest_policy.smt"
+   },
+   {
+    "code": "POLICY_VMPL",
+    "message": "vmpl 0 != 1",
+    "field": "vmpl"
+   },
+   {
+    "code": "POLICY_GUEST_SVN",
+    "message": "guest_svn 0 < 5",
+    "field": "guest_svn"
+   }
+  ]
+ },
+ "tcb-floor": {
+  "stage": "policy",
+  "violations": [
+   {
+    "code": "POLICY_TCB_OUT_OF_DATE",
+    "message": "current_tcb bl=10 tee=0 snp=23 ucode=84 below minimum bl=* tee=* snp=24 ucode=*",
+    "field": "current_tcb"
+   },
+   {
+    "code": "POLICY_TCB_OUT_OF_DATE",
+    "message": "committed_tcb bl=10 tee=0 snp=23 ucode=84 below minimum bl=* tee=* snp=24 ucode=*",
+    "field": "committed_tcb"
+   },
+   {
+    "code": "POLICY_TCB_OUT_OF_DATE",
+    "message": "reported_tcb bl=10 tee=0 snp=23 ucode=84 below minimum bl=* tee=* snp=24 ucode=*",
+    "field": "reported_tcb"
+   },
+   {
+    "code": "POLICY_LAUNCH_TCB_OUT_OF_DATE",
+    "message": "launch_tcb bl=10 tee=0 snp=23 ucode=84 below minimum bl=* tee=* snp=24 ucode=*",
+    "field": "launch_tcb"
+   }
+  ]
+ },
+ "oversized-vcek": {
+  "stage": "chain",
+  "violations": [
+   {
+    "code": "CERT_MALFORMED",
+    "message": "leaf certificate is 16385 bytes, limit 16384"
+   }
+  ]
+ }
+}

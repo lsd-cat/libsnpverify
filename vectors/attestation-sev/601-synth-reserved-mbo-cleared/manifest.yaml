@@ -1,0 +1,18 @@
+id: 601-synth-reserved-mbo-cleared
+stage: verify-attestation-sev
+title: |
+  Synth report with guest_policy bit 17 (reserved-MBO) cleared → GUEST_POLICY_RESERVED_BIT_SET.
+spec_refs: ["3.2.2", "3.7"]
+expects:
+  exit_code: 10
+  rejection_code: "GUEST_POLICY_RESERVED_BIT_SET"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-violation
+notes: |
+  Bit 17 of guest_policy is reserved-must-be-one per AMD APM
+  Vol 3 Table B-3. Clearing it is a SPEC §3.2.2 violation that
+  the conformance binary's enforce_spec_defaults check MUST
+  catch. Surfaces as GUEST_POLICY_RESERVED_BIT_SET.

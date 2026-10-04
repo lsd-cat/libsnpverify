@@ -1,0 +1,17 @@
+id: 440-author-key-digest-pin-mismatch
+stage: verify-attestation-sev
+title: |
+  policy.expected_author_key_digest_hex mismatch → AUTHOR_KEY_DIGEST_MISMATCH.
+spec_refs: ["3.1.1"]
+expects:
+  exit_code: 10
+  rejection_code: "AUTHOR_KEY_DIGEST_MISMATCH"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.extended_checks_supported: true
+fixture_kind: real-frozen-bundle-policy-pin
+notes: |
+  Real bundle has author_key_digest=0x00*48 (no author block).
+  Pin a non-zero digest → AUTHOR_KEY_DIGEST_MISMATCH per SPEC §3.1.1.
+  Parallel to fixture 430 for the author-key field.

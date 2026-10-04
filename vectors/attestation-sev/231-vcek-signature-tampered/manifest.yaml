@@ -1,0 +1,18 @@
+id: 231-vcek-signature-tampered
+stage: verify-attestation-sev
+title: |
+  VCEK ASK signature byte flipped → must reject as VCEK_CHAIN_INVALID.
+spec_refs: ["3.3.5"]
+expects:
+  exit_code: 10
+  rejection_code: "VCEK_CHAIN_INVALID"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+fixture_kind: synthetic-mutation
+notes: |
+  Flips byte 0x53b (8 bytes from end of VCEK DER, inside
+  the ASK-issued signatureValue OCTET STRING). Per SPEC §3.3.5 the
+  SDK MUST verify VCEK.signature with ASK.public_key. Any mutation
+  of those bytes surfaces as VCEK_CHAIN_INVALID — DER parses fine
+  but ASK→VCEK signature verification fails.

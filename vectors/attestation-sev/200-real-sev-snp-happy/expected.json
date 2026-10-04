@@ -1,0 +1,67 @@
+{
+  "stage": "verify-attestation-sev",
+  "accepted": true,
+  "outputs": {
+    "measurement": {
+      "type": "https://tinfoil.sh/predicate/sev-snp-guest/v2",
+      "registers": [
+        "09ef32acf90fcfeb6206d1a46c13145cef736ebbb83f18eaff680b686232031546ff5fd39c44599699ee8734cbbeb519"
+      ]
+    },
+    "body_fields": {
+      "version": 3,
+      "guest_svn": 0,
+      "policy_hex": "0000000000030000",
+      "policy_decoded": {
+        "abi_minor": 0,
+        "abi_major": 0,
+        "smt": true,
+        "reserved_mbo": true,
+        "migrate_ma": false,
+        "debug": false,
+        "single_socket": false,
+        "cxl_allow": false,
+        "mem_aes_256_xts": false,
+        "raplmsr_dis": false,
+        "ciphertext_hiding_dram": false
+      },
+      "family_id_hex": "00000000000000000000000000000000",
+      "image_id_hex": "00000000000000000000000000000000",
+      "vmpl": 0,
+      "signature_algo": 1,
+      "current_tcb_hex": "541700000000000a",
+      "current_tcb_decoded": {
+        "bl_spl": 10,
+        "tee_spl": 0,
+        "snp_spl": 23,
+        "ucode_spl": 84
+      },
+      "platform_info_hex": "0000000000000027",
+      "platform_info_decoded": {
+        "smt_en": true,
+        "tsme_en": true,
+        "ecc_en": true,
+        "rapl_dis": false,
+        "ciphertext_hiding": false
+      },
+      "signer_info_hex": "00000000",
+      "report_data_hex": "71c31f35d2b06077bbae7c1ddf0cc4020408c8f39c68b04cf3d029d40bdd45e73565781f4ee796cfb144df2a31a3ae5e87747bb5ba91aafc6b80e2e268b8603d",
+      "measurement_hex": "09ef32acf90fcfeb6206d1a46c13145cef736ebbb83f18eaff680b686232031546ff5fd39c44599699ee8734cbbeb519",
+      "host_data_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "id_key_digest_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "author_key_digest_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "report_id_hex": "88df686d81f2e49f54c3e7a1f4a29e46e1d5307b1f73f63c5a2bdae496ba8c8c",
+      "report_id_ma_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "reported_tcb_hex": "0a00000000001754",
+      "chip_id_hex": "1af1aa6c1f56037a05849a59b8815cf909583f9ba9ef2f053218c437f33ba183e4e415b039b37f8205250ad15f8b88a0a3add9f4c081c0779a48ed2214378e44",
+      "committed_tcb_hex": "2837010028370100",
+      "current_build": 10,
+      "current_minor": 0,
+      "current_major": 0,
+      "committed_build": 0,
+      "committed_minor": 0,
+      "committed_major": 23,
+      "launch_tcb_hex": "0000000000000000"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+id: 275-platform-info-tio-enabled
+stage: verify-attestation-sev
+title: |
+  PLATFORM_INFO TIO enabled with no TIO requirement must be accepted (SPEC §3.7.2 #10).
+spec_refs: ["3.7.2", "3.2.3"]
+expects:
+  exit_code: 0
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  platform_info = SMT+TSME+TIO (bit 7). §3.7.2 #10 lists tio_enabled with
+  require-semantics ("reject if required but not reported"); a report that HAS TIO
+  when nothing requires/forbids it is spec-compliant and must be ACCEPTED. Probes a
+  go divergence: go-sev-guest v0.15.0 doesn't know bit 7 and rejects it as a
+  reserved/unknown bit (QV_RESULT_TERMINAL_UNSPECIFIED); py/rs/js accept. Resolves
+  when go's go-sev-guest gains TIO awareness.

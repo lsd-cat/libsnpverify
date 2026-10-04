@@ -1,0 +1,180 @@
+{
+ "evidence": {
+  "ark": {
+   "notAfter": 2432129677,
+   "notBefore": 1643211277,
+   "serial": "020000",
+   "sha256": "4c6598d19c18719c5dfd4a7d335f674e5bfe1d8f800cea2cf270c10d103db2f1",
+   "subjectCn": "ARK-Genoa"
+  },
+  "ask": {
+   "notAfter": 2456141628,
+   "notBefore": 1667223228,
+   "serial": "020002",
+   "sha256": "5464738c1546aed5f2cecf1dc98c5c960a92e8913238a61711bc90ec6e828521",
+   "subjectCn": "SEV-Genoa"
+  },
+  "crl": {
+   "nextUpdate": 1794186000,
+   "revokedCount": 1,
+   "thisUpdate": 1790062293
+  },
+  "endorsementKey": {
+   "hwid": "1af1aa6c1f56037a05849a59b8815cf909583f9ba9ef2f053218c437f33ba183e4e415b039b37f8205250ad15f8b88a0a3add9f4c081c0779a48ed2214378e44",
+   "kind": "VCEK",
+   "notAfter": 1989074336,
+   "notBefore": 1768149536,
+   "serial": "00",
+   "sha256": "8e9994ceb7d8b8af6e3071aa5fc7338e61e4f647a1c789f0ea52cf2e9efc2b82",
+   "subjectCn": "SEV-VCEK",
+   "tcb": {
+    "bootloader": 10,
+    "microcode": 84,
+    "snp": 23,
+    "tee": 0
+   }
+  },
+  "reportSha256": "42898c8be404c4aa0e4f08186a9390912cb4abf634b18a199403c1d498b84326",
+  "reportVersion": 3,
+  "signature": {
+   "r": "bb6aa516accba269b7ac793f733717374a8b9bdafe6178bf599ef472d0cd4055c678ddca0c4263f0c8a9ec4147b4e6a0",
+   "s": "f0413a7e25d87740140d3eab422b386793958c418d95a49939bdf548ade265de29a535f2384a8d36e443b4f200780658"
+  }
+ },
+ "identity": {
+  "chipId": "1af1aa6c1f56037a05849a59b8815cf909583f9ba9ef2f053218c437f33ba183e4e415b039b37f8205250ad15f8b88a0a3add9f4c081c0779a48ed2214378e44",
+  "familyId": "00000000000000000000000000000000",
+  "guestSvn": 0,
+  "hostData": "0000000000000000000000000000000000000000000000000000000000000000",
+  "imageId": "00000000000000000000000000000000",
+  "measurement": "09ef32acf90fcfeb6206d1a46c13145cef736ebbb83f18eaff680b686232031546ff5fd39c44599699ee8734cbbeb519",
+  "reportData": "71c31f35d2b06077bbae7c1ddf0cc4020408c8f39c68b04cf3d029d40bdd45e73565781f4ee796cfb144df2a31a3ae5e87747bb5ba91aafc6b80e2e268b8603d",
+  "reportId": "88df686d81f2e49f54c3e7a1f4a29e46e1d5307b1f73f63c5a2bdae496ba8c8c",
+  "reportIdMa": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "vmpl": 0
+ },
+ "platform": {
+  "authorKeyDigest": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "cpuid": {
+   "family": 25,
+   "model": 17,
+   "stepping": 1
+  },
+  "firmware": {
+   "committed": {
+    "build": 40,
+    "major": 1,
+    "minor": 55
+   },
+   "current": {
+    "build": 40,
+    "major": 1,
+    "minor": 55
+   }
+  },
+  "guestPolicy": {
+   "abiMajor": 0,
+   "abiMinor": 0,
+   "ciphertextHidingDram": false,
+   "cxlAllowed": false,
+   "debug": false,
+   "memAes256Xts": false,
+   "migrateMa": false,
+   "pageSwapDisabled": false,
+   "raplDisabled": false,
+   "raw": "196608",
+   "singleSocket": false,
+   "smt": true
+  },
+  "idKeyDigest": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "platformInfo": {
+   "aliasCheckComplete": true,
+   "ciphertextHidingEnabled": false,
+   "eccEnabled": true,
+   "iommuWriteSafe": false,
+   "raplDisabled": false,
+   "raw": "39",
+   "smtEnabled": true,
+   "tioEnabled": false,
+   "tsmeEnabled": true
+  },
+  "product": "Genoa",
+  "productName": "Genoa",
+  "signer": {
+   "authorKeyEnabled": false,
+   "maskChipKey": false,
+   "signingKey": "VCEK"
+  },
+  "tcb": {
+   "committed": {
+    "bootloader": 10,
+    "microcode": 84,
+    "snp": 23,
+    "tee": 0
+   },
+   "current": {
+    "bootloader": 10,
+    "microcode": 84,
+    "snp": 23,
+    "tee": 0
+   },
+   "launch": {
+    "bootloader": 10,
+    "microcode": 84,
+    "snp": 23,
+    "tee": 0
+   },
+   "reported": {
+    "bootloader": 10,
+    "microcode": 84,
+    "snp": 23,
+    "tee": 0
+   }
+  }
+ },
+ "policyApplied": {
+  "allowMaskedChipId": false,
+  "allowProvisionalFirmware": false,
+  "guestPolicy": {
+   "cxlAllowed": "forbidden",
+   "debug": "forbidden",
+   "memAes256Xts": "any",
+   "migrateMa": "forbidden"
+  },
+  "idBlock": "forbid",
+  "measurement": [
+   "09ef32acf90fcfeb6206d1a46c13145cef736ebbb83f18eaff680b686232031546ff5fd39c44599699ee8734cbbeb519"
+  ],
+  "minFirmware": {
+   "build": 0,
+   "major": 0,
+   "minor": 0
+  },
+  "minGuestSvn": 0,
+  "minLaunchTcb": {
+   "Genoa": {
+    "snp": 20
+   }
+  },
+  "minReportVersion": 2,
+  "minTcb": {
+   "Genoa": {
+    "snp": 20
+   }
+  },
+  "platformInfo": {
+   "allowUnknownBits": false
+  },
+  "products": [
+   "Genoa"
+  ],
+  "reportData": {
+   "kind": "prefix",
+   "value": "71c31f35d2b06077bbae7c1ddf0cc402"
+  },
+  "requireCrl": true,
+  "signingKey": "VCEK",
+  "vmpl": 0
+ },
+ "verifiedAt": 1790062353
+}

@@ -1,0 +1,16 @@
+id: 262-firmware-build-below-min
+stage: verify-attestation-sev
+title: |
+  current+committed firmware build below §3.7.1 minimum (21) must reject (SPEC §3.7.2 #3).
+spec_refs: ["3.7.2", "3.7.1"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  current_build = committed_build = 10 (< minimum_build 21); equal, so the
+  provisional rule holds. §3.7.2 #3 requires both builds >= minimum_build. Must
+  reject.

@@ -1,0 +1,16 @@
+id: 606-guest-policy-mem-aes256-xts
+stage: verify-attestation-sev
+title: |
+  Guest policy with mem_aes256_xts set must reject (SPEC §3.7.2 #1, default not allowed).
+spec_refs: ["3.7.2", "3.2.2"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  policy bit 22 (mem_aes256_xts) set. §3.7.1's default guest policy leaves
+  mem_aes256_xts false, and §3.7.2 #1 rejects a report that enables it when not
+  allowed. An SDK that doesn't constrain mem_aes256_xts accepts.

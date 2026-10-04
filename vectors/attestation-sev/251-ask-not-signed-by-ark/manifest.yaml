@@ -1,0 +1,16 @@
+id: 251-ask-not-signed-by-ark
+stage: verify-attestation-sev
+title: |
+  ASK not signed by the trusted ARK must reject (SPEC §3.3.2 / §3.3.5).
+spec_refs: ["3.3.2", "3.3.5"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-chain-integrity
+notes: |
+  Trust root is chain A's ARK, but the ASK, VCEK, and report all come from an
+  unrelated chain B. Chain B's ASK is signed by chain B's ARK, not the trusted
+  chain A ARK, so the intermediate link is broken. All SDKs must reject.

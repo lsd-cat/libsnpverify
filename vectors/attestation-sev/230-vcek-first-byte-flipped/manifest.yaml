@@ -1,0 +1,18 @@
+id: 230-vcek-first-byte-flipped
+stage: verify-attestation-sev
+title: |
+  VCEK DER first byte flipped → must reject as VCEK_CHAIN_INVALID.
+spec_refs: ["3.3.3"]
+expects:
+  exit_code: 10
+  rejection_code: ["VCEK_CHAIN_INVALID", "REPORT_FORMAT_UNSUPPORTED"]
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+fixture_kind: synthetic-mutation
+notes: |
+  Flips byte 0x00 of the DER VCEK certificate (0x30 SEQUENCE tag).
+  Per SPEC §3.3.3 the VCEK MUST chain to AMD's ARK via ASK; any
+  structural corruption surfaces as VCEK_CHAIN_INVALID. SDKs that
+  reject at DER parse (before chain verification) emit
+  REPORT_FORMAT_UNSUPPORTED.

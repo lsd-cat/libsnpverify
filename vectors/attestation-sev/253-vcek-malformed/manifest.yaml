@@ -1,0 +1,16 @@
+id: 253-vcek-malformed
+stage: verify-attestation-sev
+title: |
+  Structurally malformed (truncated) VCEK certificate must reject (SPEC §3.4.2).
+spec_refs: ["3.4.2"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-chain-integrity
+notes: |
+  The injected VCEK DER is truncated (last 60 bytes removed) so it is not a
+  parseable X.509 certificate. SPEC §3.4.2 VCEK format validation must reject;
+  the failure should be a clean malformed/format error, not a crash.

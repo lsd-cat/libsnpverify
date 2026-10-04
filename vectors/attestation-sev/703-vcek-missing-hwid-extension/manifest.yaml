@@ -1,0 +1,20 @@
+id: 703-vcek-missing-hwid-extension
+stage: verify-attestation-sev
+title: |
+  VCEK missing HWID extension → VCEK_HWID_MISMATCH.
+spec_refs: ["3.4.4"]
+expects:
+  exit_code: 10
+  rejection_code: ["VCEK_HWID_MISMATCH", "VCEK_CHAIN_INVALID"]
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-vcek-extension
+notes: |
+  SPEC §3.4 mandates VCEK's HWID extension presence. A cert
+  without it can't be cross-checked against report.chip_id;
+  go-sev-guest emits 'missing HWID extension for VCEK certificate'
+  which the conformance binary buckets as VCEK_HWID_MISMATCH
+  (SPEC's nearest enumerated code). List-form allows SDKs that
+  treat structural extension errors as VCEK_CHAIN_INVALID.

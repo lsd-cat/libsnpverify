@@ -1,0 +1,18 @@
+id: 261-provisional-committed-ne-current
+stage: verify-attestation-sev
+title: |
+  committed firmware != current (provisional firmware) must reject (SPEC §3.7.2 #12).
+spec_refs: ["3.7.2", "3.7.1"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  current_build=30, committed_build=31 — both above the minimum (21) but unequal.
+  §3.7.1 sets permit_provisional_firmware=false (MUST be false), so §3.7.2 #12
+  requires committed == current (build/minor/major/tcb). Must reject. Directly
+  probes the provisional rule — an SDK running with permit_provisional_firmware
+  =true (a conformance adapter that sets it) accepts.

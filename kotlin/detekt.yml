@@ -1,0 +1,37 @@
+# Rules tuned for this code base: long verification functions and long message lines are intentional.
+style:
+  MaxLineLength:
+    active: false
+  ReturnCount:
+    active: false
+  MagicNumber:
+    active: false
+  UnusedPrivateMember:
+    active: true
+complexity:
+  LongMethod:
+    active: false
+  LongParameterList:
+    active: false
+  CyclomaticComplexMethod:
+    active: false
+  TooManyFunctions:
+    active: false
+  NestedBlockDepth:
+    active: false
+  ComplexCondition:
+    active: false
+  LargeClass:
+    active: false
+exceptions:
+  SwallowedException:
+    active: false   # JCA failures map to `false`; DER failures map to violations
+  TooGenericExceptionCaught:
+    active: false
+naming:
+  MatchingDeclarationName:
+    active: false   # files group related declarations (Bind, Roots, BasePolicies)
+  ConstructorParameterNaming:
+    active: false
+  TopLevelPropertyNaming:
+    active: false

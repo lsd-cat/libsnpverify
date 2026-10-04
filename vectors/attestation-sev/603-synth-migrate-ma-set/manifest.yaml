@@ -1,0 +1,25 @@
+id: 603-synth-migrate-ma-set
+stage: verify-attestation-sev
+title: |
+  Synth report with guest_policy.migrate_ma=1 (bit 18) → GUEST_POLICY_MIGRATE_MA_SET.
+spec_refs: ["3.2.2", "3.7"]
+expects:
+  exit_code: 10
+  rejection_code: "GUEST_POLICY_MIGRATE_MA_SET"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-violation
+notes: |
+  Tinfoil's production policy forbids migration (guest_policy.migrate_ma
+  must be 0). go-sev-guest's validate.SnpAttestation with
+  GuestPolicy.MigrateMA=false rejects with 'found unauthorized
+  migration agent capability'. The conformance binary translates
+  this into a dedicated GUEST_POLICY_MIGRATE_MA_SET rejection code
+  (not in SPEC §3.7's enumeration but cleaner than the
+  QV_RESULT_TERMINAL_UNSPECIFIED fallback).
+  
+  Note: SPEC §3.7 doesn't enumerate MIGRATE_MA as a normative
+  rejection — this is Tinfoil-policy tightening on top of the
+  AMD-defined guest policy bits.

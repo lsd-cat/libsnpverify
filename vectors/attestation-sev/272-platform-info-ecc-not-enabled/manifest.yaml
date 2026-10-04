@@ -1,0 +1,17 @@
+id: 272-platform-info-ecc-not-enabled
+stage: verify-attestation-sev
+title: |
+  PLATFORM_INFO ECC not enabled: no spec mandate; probe surfaces the gap (SPEC §3.7.2 #10).
+spec_refs: ["3.7.2", "3.2.3"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  platform_info = SMT+TSME+RAPL_DIS, ECC (bit 2) clear (TIO left off to avoid the
+  go-sev-guest TIO allowlist rejection). §3.7.1 default does not require ECC, so
+  all SDKs accept. Expected=reject encodes a hardened stance (memory ECC
+  integrity). DECIDE-LATER: mandate ecc_enabled.

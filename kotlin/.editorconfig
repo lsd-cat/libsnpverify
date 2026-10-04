@@ -1,0 +1,13 @@
+root = true
+
+[*.{kt,kts}]
+indent_size = 4
+max_line_length = off
+ktlint_code_style = intellij_idea
+ktlint_standard_filename = disabled
+ktlint_standard_no-wildcard-imports = disabled
+ktlint_standard_no-semi = disabled
+ktlint_standard_property-naming = disabled
+ktlint_standard_no-consecutive-comments = disabled
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled

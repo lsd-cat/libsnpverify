@@ -1,0 +1,16 @@
+id: 263-firmware-version-below-min
+stage: verify-attestation-sev
+title: |
+  current+committed firmware version below §3.7.1 minimum (1.55) must reject (SPEC §3.7.2 #4).
+spec_refs: ["3.7.2", "3.7.1"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  current/committed major=1, minor=0 → version 0x0100 < minimum_version 0x0137
+  (1.55). Build left at the synth template. §3.7.2 #4 requires both versions >=
+  minimum_version. Must reject.

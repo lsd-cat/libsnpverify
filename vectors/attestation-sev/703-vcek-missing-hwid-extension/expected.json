@@ -1,0 +1,10 @@
+{
+  "stage": "verify-attestation-sev",
+  "accepted": false,
+  "rejection": {
+    "code": [
+      "VCEK_HWID_MISMATCH",
+      "VCEK_CHAIN_INVALID"
+    ]
+  }
+}

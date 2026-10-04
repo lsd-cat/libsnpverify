@@ -1,0 +1,19 @@
+id: 268-vlek-signed-report
+stage: verify-attestation-sev
+title: |
+  Report with SIGNER_INFO signing_key=VLEK (not VCEK): all SDKs reject today (SPEC §3.3.3 is VCEK-only).
+spec_refs: ["3.3.3", "3.2.4"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  signer_info = 0x04 (signing_key field = 1 = VLEK). AMD allows VLEK-signed
+  reports (CSP-endorsed key) but the tinfoil SPEC §3.3.3 only defines the VCEK
+  path, and every SDK rejects a non-VCEK signing key before signature check. This
+  fixture documents that uniform behavior. DECIDE-LATER: if tinfoil must support
+  VLEK deployments, this flips to accept + needs a VLEK cert-chain verifier;
+  otherwise VLEK-rejection is intentional hardening (trust only our own VCEK).

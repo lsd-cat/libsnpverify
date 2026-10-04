@@ -1,0 +1,18 @@
+id: 267-mask-chip-id-accept
+stage: verify-attestation-sev
+title: |
+  Masked CHIP_ID (MASK_CHIP_KEY set, chip_id zeroed) must be accepted (SPEC §3.4.4).
+spec_refs: ["3.4.4", "3.7.2"]
+expects:
+  exit_code: 0
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  signer_info = 0x02 (MASK_CHIP_KEY=1, signing_key=VCEK), chip_id all-zero. When
+  the platform masks the chip key, CHIP_ID is zeroed and the VCEK HWID binding is
+  skipped — the report is still valid. Expected ACCEPT. Probes SDKs whose adapter
+  does an unconditional HWID==chip_id comparison and wrongly rejects a masked
+  report.

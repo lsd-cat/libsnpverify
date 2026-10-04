@@ -1,0 +1,25 @@
+id: 210-wrong-report-version
+stage: verify-attestation-sev
+title: |
+  Report version byte set to 2 → must reject as wrong-version, format-unsupported, or signature-invalid.
+spec_refs: ["3.1"]
+expects:
+  exit_code: 10
+  rejection_code: ["WRONG_REPORT_VERSION", "REPORT_FORMAT_UNSUPPORTED", "REPORT_SIGNATURE_INVALID"]
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+fixture_kind: synthetic-mutation
+notes: |
+  Single-byte mutation at offset 0x00 (report.version) from 0x03 → 0x02.
+  
+  v2 reports use a different layout than v3 — different fields end
+  up in the must-be-zero ranges go-sev-guest sanity-checks at parse
+  (e.g. MBZ at 0x188..0x1a0 for v3 has guest_svn-ish bytes from v2).
+  
+  Cross-SDK divergence captured in list-form rejection_code:
+    - SDKs with a strict version check emit WRONG_REPORT_VERSION.
+    - SDKs that hit a parser MBZ violation emit REPORT_FORMAT_UNSUPPORTED.
+    - SDKs that parse leniently reach the signature step and emit
+      REPORT_SIGNATURE_INVALID (v2 signed region ≠ v3 signed region).
+  All three are SPEC §3.1-anchored.

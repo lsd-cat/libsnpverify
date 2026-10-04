@@ -1,0 +1,7 @@
+{
+  "stage": "verify-attestation-sev",
+  "accepted": false,
+  "rejection": {
+    "code": "HOST_DATA_MISMATCH"
+  }
+}

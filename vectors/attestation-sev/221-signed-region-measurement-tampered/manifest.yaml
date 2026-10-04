@@ -1,0 +1,19 @@
+id: 221-signed-region-measurement-tampered
+stage: verify-attestation-sev
+title: |
+  Measurement first byte flipped → must reject as REPORT_SIGNATURE_INVALID.
+spec_refs: ["3.6", "3.8"]
+expects:
+  exit_code: 10
+  rejection_code: "REPORT_SIGNATURE_INVALID"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+fixture_kind: synthetic-mutation
+notes: |
+  Flips byte 0x90 (first byte of the 48-byte measurement field).
+  Per SPEC §3.6 the signature covers bytes 0..0x2A0; mutating any
+  byte inside that range invalidates the signature. SDKs MUST NOT
+  rely on the measurement field for anything before signature
+  verification passes — this fixture pins that ordering: signature
+  check rejects FIRST, MEASUREMENT_MISMATCH is unreachable here.

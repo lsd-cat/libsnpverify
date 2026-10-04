@@ -1,0 +1,18 @@
+id: 410-host-data-pin-mismatch
+stage: verify-attestation-sev
+title: |
+  policy.expected_host_data_hex mismatch → HOST_DATA_MISMATCH.
+spec_refs: ["8.3"]
+expects:
+  exit_code: 10
+  rejection_code: "HOST_DATA_MISMATCH"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.extended_checks_supported: true
+fixture_kind: real-frozen-bundle-policy-pin
+notes: |
+  Real bundle has host_data=0x00*32. Pin host_data=0xff*32. Per
+  SPEC §8.3 host_data is the TLS pinning binding — the SDK MUST
+  reject when the pinned value doesn't match what the enclave
+  self-attested. Surfaces as HOST_DATA_MISMATCH.

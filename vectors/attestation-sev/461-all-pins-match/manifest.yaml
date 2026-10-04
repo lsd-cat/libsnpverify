@@ -1,0 +1,18 @@
+id: 461-all-pins-match
+stage: verify-attestation-sev
+title: |
+  All policy.expected_*_hex pins match → accepted.
+spec_refs: ["3.7", "3.8", "8.2", "8.3"]
+expects:
+  exit_code: 0
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.extended_checks_supported: true
+fixture_kind: real-frozen-bundle-policy-pin
+notes: |
+  Stacks every policy field at its actual real-bundle value.
+  Exercises every pin path simultaneously. Future Phase 4B-SEV
+  will use a synth-chain re-signed report to test the negative
+  side of normative checks (DEBUG bit set, reserved bit set)
+  without breaking signature verification.

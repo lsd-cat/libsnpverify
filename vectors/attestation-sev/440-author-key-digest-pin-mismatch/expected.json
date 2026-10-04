@@ -1,0 +1,7 @@
+{
+  "stage": "verify-attestation-sev",
+  "accepted": false,
+  "rejection": {
+    "code": "AUTHOR_KEY_DIGEST_MISMATCH"
+  }
+}

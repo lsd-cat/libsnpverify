@@ -1,0 +1,17 @@
+id: 702-vcek-ucode-spl-mismatch
+stage: verify-attestation-sev
+title: |
+  VCEK UCODE_SPL extension < report.reported_tcb.ucode_spl → VCEK_TCB_MISMATCH.
+spec_refs: ["3.4.3"]
+expects:
+  exit_code: 10
+  rejection_code: ["VCEK_TCB_MISMATCH", "VCEK_CHAIN_INVALID"]
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-vcek-extension
+notes: |
+  Parallels 701 for the UCODE_SPL extension. Synth cert pins
+  UCODE_SPL=10; report reported_tcb.ucode_spl=84 (from
+  base_kwargs). Microcode security patch level disagrees.

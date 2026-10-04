@@ -1,0 +1,7 @@
+{
+  "stage": "verify-attestation-sev",
+  "accepted": false,
+  "rejection": {
+    "code": "VCEK_EXPIRED"
+  }
+}

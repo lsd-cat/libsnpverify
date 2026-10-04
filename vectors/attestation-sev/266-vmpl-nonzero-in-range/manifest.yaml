@@ -1,0 +1,18 @@
+id: 266-vmpl-nonzero-in-range
+stage: verify-attestation-sev
+title: |
+  VMPL=2 (in range, non-zero): spec accepts unless configured; probes SDKs that hard-require 0.
+spec_refs: ["3.7.2"]
+expects:
+  exit_code: 0
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  vmpl = 2 — valid range, non-zero. §3.7.2 #11 only mandates an exact match "when
+  configured", and the §3.7.1 defaults do not configure an expected VMPL, so the
+  spec-compliant outcome is ACCEPT. This probe surfaces SDKs that default to
+  requiring VMPL==0 (a hardening choice not in the spec). DECIDE-LATER: whether to
+  mandate VMPL==0 in the spec. Expected accept reflects the current spec.

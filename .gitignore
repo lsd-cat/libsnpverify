@@ -1,0 +1,8 @@
+.DS_Store
+kotlin/.gradle/
+kotlin/.kotlin/
+kotlin/build/
+node_modules/
+ts/dist/
+ts/playwright-report/
+ts/test-results/

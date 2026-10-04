@@ -1,0 +1,22 @@
+id: 240-vcek-expired
+stage: verify-attestation-sev
+title: |
+  Verification date past VCEK NotAfter → must reject as VCEK_EXPIRED.
+spec_refs: ["3.3.3"]
+expects:
+  exit_code: 10
+  rejection_code: "VCEK_EXPIRED"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.verification_time_override: "supported"
+fixture_kind: synthetic-mutation
+notes: |
+  Sets expiration_check_date_unix = 2019686400 (2034-01-01 UTC),
+  past the staged VCEK's NotAfter (2033-01-11 16:38:56 UTC). Per
+  SPEC §3.3.3 the SDK MUST reject when the verification time is
+  outside the VCEK's validity window. Surfaces as VCEK_EXPIRED.
+  
+  Skips on SDKs with verification_time_override=system-clock-only —
+  they consult datetime.now() unconditionally and the fixture-
+  supplied date is ignored.

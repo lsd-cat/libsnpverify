@@ -1,0 +1,18 @@
+id: 260-tcb-snp-spl-below-min
+stage: verify-attestation-sev
+title: |
+  current/committed TCB snp_spl below §3.7.1 minimum must reject (SPEC §3.7.2 #5).
+spec_refs: ["3.7.2", "3.2.1"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  current_tcb and committed_tcb carry snp_spl=13 (< default minimum 0x0E=14);
+  reported_tcb stays synth (23) so the VCEK↔reported TCB match passes. The
+  per-component TCB minimum (§3.7.2 #5) must reject. Companion to 450/451
+  (bl/ucode); adds the snp component. Rejects on SDKs that apply the §3.7.1
+  defaults; an SDK that skips default TCB-minimum enforcement accepts.

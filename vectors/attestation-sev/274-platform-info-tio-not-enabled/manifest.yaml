@@ -1,0 +1,16 @@
+id: 274-platform-info-tio-not-enabled
+stage: verify-attestation-sev
+title: |
+  PLATFORM_INFO TIO not enabled: no spec mandate; probe surfaces the gap (SPEC §3.7.2 #10).
+spec_refs: ["3.7.2", "3.2.3"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  platform_info = SMT+TSME+ECC+RAPL_DIS, TIO (bit 7) clear. §3.7.1 default does not
+  require SEV-TIO (trusted I/O), so all SDKs accept. Expected=reject encodes a
+  hardened stance for TIO deployments. DECIDE-LATER: mandate tio_enabled.

@@ -1,0 +1,26 @@
+id: 600-synth-debug-bit-set
+stage: verify-attestation-sev
+title: |
+  Synth report with guest_policy.debug=1 → must reject as GUEST_POLICY_DEBUG_SET.
+spec_refs: ["3.2.2", "3.7"]
+expects:
+  exit_code: 10
+  rejection_code: "GUEST_POLICY_DEBUG_SET"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-violation
+notes: |
+  Synth report signed by the persisted synth VCEK; signature
+  verifies fine but bit 19 (DEBUG) is set. SPEC §3.7 says the
+  SDK MUST reject any production-attesting report with DEBUG=1
+  (a debug-mode enclave can be inspected by the host so its
+  measurements are not trustworthy).
+  
+  Two paths to rejection:
+    (a) lib-level: validate.SnpAttestation with GuestPolicy.Debug=false
+        catches this regardless of fixture policy.
+    (b) conformance-binary: enforce_spec_defaults=true triggers
+        the explicit DEBUG bit check.
+  Either should produce GUEST_POLICY_DEBUG_SET.

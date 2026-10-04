@@ -1,0 +1,22 @@
+id: 701-vcek-bl-spl-mismatch
+stage: verify-attestation-sev
+title: |
+  VCEK BL_SPL extension < report.reported_tcb.bl_spl → VCEK_TCB_MISMATCH.
+spec_refs: ["3.4.3"]
+expects:
+  exit_code: 10
+  rejection_code: ["VCEK_TCB_MISMATCH", "VCEK_CHAIN_INVALID"]
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-vcek-extension
+notes: |
+  SPEC §3.4.3: VCEK SPL extensions reflect the TCB level the
+  key was endorsed for. A report whose reported_tcb declares
+  a higher SPL than the cert means either the cert is stale
+  or the report is forged with a stronger TCB claim than the
+  issuing AMD KDS would have endorsed at that time.
+  
+  Synth cert: BL_SPL=5. Report reported_tcb.bl_spl=10. Mismatch.
+  List-form accommodates VCEK_CHAIN_INVALID bucketing.

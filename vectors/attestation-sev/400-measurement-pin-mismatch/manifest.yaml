@@ -1,0 +1,19 @@
+id: 400-measurement-pin-mismatch
+stage: verify-attestation-sev
+title: |
+  policy.expected_measurement_hex pinned to wrong value → MEASUREMENT_MISMATCH.
+spec_refs: ["3.8"]
+expects:
+  exit_code: 10
+  rejection_code: "MEASUREMENT_MISMATCH"
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.extended_checks_supported: true
+fixture_kind: real-frozen-bundle-policy-pin
+notes: |
+  Real Genoa bundle has measurement=09ef32...eb519. Pin a value
+  with the first hex char flipped (f9ef32...). Per SPEC §3.8 the
+  SDK MUST enforce caller-supplied measurement pins; mismatch is
+  MEASUREMENT_MISMATCH. Tests the policy-enforcement pipeline
+  after-signature: the report verifies fine, the SDK then rejects.

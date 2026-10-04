@@ -1,0 +1,18 @@
+id: 452-tcb-launch-below-min
+stage: verify-attestation-sev
+title: |
+  launch_tcb below §3.7.1 minimum_launch_tcb must reject (SPEC §3.7.2 #7).
+spec_refs: ["3.7.2", "3.7.1"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  launch_tcb carries snp_spl=13 (< default minimum 0x0E); current/committed/
+  reported TCB all stay at the valid SYNTH baseline so only the launch TCB is
+  anomalous. §3.7.2 #7 requires launch_tcb to meet minimum_launch_tcb
+  component-wise. An SDK that skips the launch-TCB check accepts (TCB-rollback of
+  the launch measurement).

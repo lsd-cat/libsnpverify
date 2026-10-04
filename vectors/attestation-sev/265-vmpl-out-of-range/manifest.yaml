@@ -1,0 +1,16 @@
+id: 265-vmpl-out-of-range
+stage: verify-attestation-sev
+title: |
+  VMPL outside 0..3 must reject (SPEC §3.7.2 #11).
+spec_refs: ["3.7.2"]
+expects:
+  exit_code: 10
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-policy
+notes: |
+  vmpl = 4, outside the mandated 0..3 range. §3.7.2 #11 says VMPL MUST be in range
+  0-3 (unconditionally). Must reject. An SDK that only checks VMPL when an expected
+  value is configured accepts.

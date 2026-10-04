@@ -1,0 +1,22 @@
+id: 700-vcek-hwid-mismatch
+stage: verify-attestation-sev
+title: |
+  VCEK HWID extension chip_id != report.chip_id → VCEK_HWID_MISMATCH.
+spec_refs: ["3.4.4"]
+expects:
+  exit_code: 10
+  rejection_code: ["VCEK_HWID_MISMATCH", "VCEK_CHAIN_INVALID"]
+required_capabilities:
+  attestation_sev.supported: true
+  attestation_sev.injected_collateral_supported: true
+  attestation_sev.amd_root_ca_injection_supported: true
+fixture_kind: synthetic-vcek-extension
+notes: |
+  SPEC §3.4.4: VCEK's HWID extension (OID 1.3.6.1.4.1.3704.1.4)
+  binds the cert to a specific AMD chip. The SDK MUST verify
+  VCEK.HWID == report.chip_id; mismatch means the cert and the
+  attesting chip are different machines.
+  
+  Synth chain's VCEK pins HWID = SYNTH_CHIP_ID; report carries
+  chip_id = 0xBB×64. List-form code accommodates SDKs that
+  bucket all VCEK cross-checks as VCEK_CHAIN_INVALID.
