@@ -4,12 +4,12 @@ import type { Report, Product, GuestPolicy, PlatformInfo, FirmwareVersion, TcbVe
 import type { Chain, CrlInfo } from './chain.ts';
 import type { Certificate } from './der.ts';
 import type { Tcbs } from './bind.ts';
-import type { ResolvedPolicy } from './policy.ts';
+import type { ResolvedAppraisalPolicy } from './policy.ts';
 import type { CryptoProvider } from './crypto.ts';
 
 export interface CertSummary { sha256: Uint8Array; serial: Uint8Array; subjectCn: string; notBefore: number; notAfter: number }
 
-export interface Attestation {
+export interface AttestationResult {
   identity: {
     chipId: Uint8Array; reportId: Uint8Array; reportIdMa: Uint8Array; measurement: Uint8Array; hostData: Uint8Array; reportData: Uint8Array;
     familyId: Uint8Array; imageId: Uint8Array; guestSvn: number; vmpl: number;
@@ -24,14 +24,16 @@ export interface Attestation {
   };
   evidence: {
     reportVersion: number; reportSha256: Uint8Array; signature: { r: Uint8Array; s: Uint8Array };
+  };
+  endorsements: {
     endorsementKey: CertSummary & { kind: SigningKey; hwid?: Uint8Array; cspId?: string; tcb: TcbVersion };
     ask: CertSummary; ark: CertSummary; crl?: CrlInfo;
   };
-  policyApplied: ResolvedPolicy;
-  verifiedAt: number;
+  appraisalPolicy: ResolvedAppraisalPolicy;
+  appraisedAt: number;
 }
 
-export async function buildAttestation(report: Report, chain: Chain, tcb: Tcbs, policy: ResolvedPolicy, now: number, crypto: CryptoProvider): Promise<Attestation> {
+export async function buildAttestationResult(report: Report, chain: Chain, tcb: Tcbs, policy: ResolvedAppraisalPolicy, now: number, crypto: CryptoProvider): Promise<AttestationResult> {
   const sum = async (c: Certificate): Promise<CertSummary> => ({ sha256: await crypto.sha256(c.der), serial: c.serial, subjectCn: c.subjectCN, notBefore: c.notBefore, notAfter: c.notAfter });
   const ek = chain.leaf;
   return {
@@ -41,11 +43,12 @@ export async function buildAttestation(report: Report, chain: Chain, tcb: Tcbs, 
       firmware: { current: report.currentVersion, committed: report.committedVersion },
       mitVectors: report.launchMitVector !== undefined ? { launch: report.launchMitVector, current: report.currentMitVector! } : undefined,
       signer: report.signerInfo, idKeyDigest: report.idKeyDigest, authorKeyDigest: report.authorKeyDigest },
-    evidence: { reportVersion: report.version, reportSha256: await crypto.sha256(report.raw), signature: report.signature,
+    evidence: { reportVersion: report.version, reportSha256: await crypto.sha256(report.raw), signature: report.signature },
+    endorsements: {
       endorsementKey: { ...(await sum(ek.cert)), kind: ek.kind, hwid: ek.hwid, cspId: ek.cspId, tcb: ek.tcb },
       ask: await sum(chain.intermediate), ark: await sum(chain.root), crl: chain.crl },
-    policyApplied: policy,
-    verifiedAt: now,
+    appraisalPolicy: policy,
+    appraisedAt: now,
   };
 }
 

@@ -6,28 +6,45 @@ implementations are tested against the vectors in `vectors/`.
 
 ## 1. Scope
 
-The library verifies one ATTESTATION_REPORT (AMD publication 56860, report versions 2 to 5).
-Verification consists of parsing the report, validating the AMD certificate chain that endorses
-the signing key, binding that key to the report, checking the report signature, and evaluating a
-caller-supplied policy. The result contains the decoded report, a summary of each certificate and
-the policy as applied. Fetching certificates, transport formats, freshness protocols, launch
-measurement computation, the GHCB certificate table and Intel TDX are outside this library (§11).
+The library is a Verifier in the sense of the RATS architecture (RFC 9334). It appraises one
+ATTESTATION_REPORT (AMD publication 56860, report versions 2 to 5) as Evidence. Appraisal consists
+of parsing the Evidence, validating the AMD certificate chain that endorses the signing key,
+binding that key to the Evidence, checking the Evidence signature, and evaluating an Appraisal
+Policy for Evidence supplied by the caller. The Attestation Result contains the decoded report, a
+summary of each Endorsement and the appraisal policy as applied. Fetching Endorsements, conveyance
+formats, freshness protocols, Reference Value computation, the GHCB certificate table and Intel
+TDX are outside this library (§11).
+
+| RFC 9334 term | In this library |
+|---|---|
+| Attester | the SEV-SNP guest, whose report the AMD Secure Processor signs |
+| Evidence | the 1184-byte ATTESTATION_REPORT (`AppraisalInput.evidence`) |
+| Endorser | AMD |
+| Endorsements | the VCEK or VLEK certificate, the ASK or ASVK certificate, the ARK certificate and the CRL (`AppraisalInput.endorsements`) |
+| Trust anchor | the ARK for the product, embedded or supplied as `trustedArks` |
+| Reference Value Provider | the builder of the guest image (launch measurements); AMD security bulletins (TCB floors) |
+| Reference Values | the measurements, TCB floors, firmware versions and other expected values in the appraisal policy |
+| Appraisal Policy for Evidence | `AppraisalPolicy` (§5) |
+| Verifier | `SnpVerifier` |
+| Attestation Result | `AttestationResult` (§6), or the failed stage and its violations |
+| Verifier Owner | the caller that supplies the appraisal policy, the trust anchors and the appraisal time |
+| Relying Party | the caller that acts on the Attestation Result |
 
 ## 2. Properties
 
 1. The library makes no network requests, does not read the system clock and keeps no global
-   state. The caller supplies the verification time and all certificates, so a report can be
-   verified as of any time.
+   state. The caller supplies the appraisal time and all Endorsements, so Evidence can be
+   appraised as of any time.
 2. The trust anchor is the AMD Root Key (ARK) for the product, compared byte for byte against
    the embedded or caller-supplied root.
 3. Unknown report versions, set reserved bits, missing certificate extensions and malformed DER
    are rejected.
-4. The caller supplies the policy. The resolved policy, with defaults filled in, is part of the
-   result.
+4. The caller supplies the appraisal policy. The resolved appraisal policy, with defaults filled
+   in, is part of the Attestation Result.
 5. The report signature is checked over the report bytes as received.
 6. Inputs are size-checked (certificates 16 KiB, CRLs 1 MiB) and copied on entry. Parsed records
    hold their own copies and return copies on access.
-7. Each stage returns a result value. Verification outcomes are not exceptions.
+7. Each stage returns a result value. Appraisal outcomes are not exceptions.
 8. The library has no runtime dependencies. Cryptographic operations go through a provider
    interface with three methods.
 
@@ -35,19 +52,21 @@ measurement computation, the GHCB certificate table and Intel TDX are outside th
 
 ```
 verifier = SnpVerifier({ crypto?, trustedArks? })   // TS: crypto defaults to WebCrypto. Kotlin: SnpVerifier(crypto, trustedArks?)
-result   = verifier.verify(VerifyInput)
+result   = verifier.appraise(AppraisalInput)
 
-VerifyInput  { report: bytes(1184); vcek: bytes; ask?: bytes; ark?: bytes; crl?: bytes; now: int64; policy: Policy }
-VerifyResult = Ok { attestation: Attestation }
-             | Err { stage: parse|chain|bind|signature|policy; violations: Violation[]; partial?: { report?, chain?, tcb? } }
-Result<T>    = Ok { value: T } | Err { error: Violation }
-Violation    { code: ErrorCode; message: string; field?: string }   // field in 56860 snake_case, e.g. "guest_policy.debug"
+AppraisalInput  { evidence: bytes(1184); endorsements: Endorsements; now: int64; policy: AppraisalPolicy }
+Endorsements    { vcek: bytes; ask?: bytes; ark?: bytes; crl?: bytes }   // vcek holds a VCEK or a VLEK; ask an ASK or an ASVK
+AppraisalResult = Ok { attestationResult: AttestationResult }
+                | Err { stage: parse|chain|bind|signature|policy; violations: Violation[]; partial?: { report?, chain?, tcb? } }
+Result<T>       = Ok { value: T } | Err { error: Violation }
+Violation       { code: ErrorCode; message: string; field?: string }   // field in 56860 snake_case, e.g. "guest_policy.debug"
 ```
 
-The constructor takes the cryptographic provider and the trusted root certificates. `verify`
-takes one report, its collateral, the verification time and the policy. The five stages are also
-callable on their own: `parseReport`, `verifyChain`, `bindEndorsement`, `verifyReportSignature`
-and `checkPolicy`, with `resolvePolicy` filling policy defaults. The parse, chain, bind and
+The constructor takes the cryptographic provider and the trust anchors. `appraise` takes one
+piece of Evidence, its Endorsements, the appraisal time and the appraisal policy. The five stages
+are also callable on their own: `parseReport`, `verifyChain`, `bindEndorsement`,
+`verifyReportSignature` and `checkAppraisalPolicy`, with `resolveAppraisalPolicy` filling policy
+defaults. The parse, chain, bind and
 signature stages return the first violation found. The policy stage returns all violations.
 
 ## 4. Providers
@@ -65,14 +84,15 @@ implementation provides `JcaCryptoProvider(provider: java.security.Provider? = n
 the Java Cryptography Architecture; `null` selects the platform provider, and
 `BouncyCastleProvider()` selects BouncyCastle.
 
-## 5. Policy
+## 5. Appraisal policy
 
+The appraisal policy holds the Reference Values and the rules for comparing the Evidence with them.
 `Bit` has three values: `required` (the report bit must be set), `forbidden` (the report bit must
 be clear) and `any`. Byte-valued fields are compared for equality when present. Defaults are in
 brackets.
 
 ```
-Policy {
+AppraisalPolicy {
   measurement:          bytes(48)[] | "any"      // required; an empty list is POLICY_INVALID
   products?:            Product[]               [Genoa, Turin]
   signingKey?:          VCEK | VLEK | any       [VCEK]
@@ -102,27 +122,29 @@ Policy {
 TcbFloor { bootloader?, tee?, snp?, microcode?, fmc?: int }   // absent = unconstrained
 ```
 
-`reportData` carries the session binding. With `exact` or `prefix`, the report must contain the
-value the verifier expects, for example a hash of a nonce the verifier chose and the peer's channel
-key. With `any`, the report may have been produced for another session. An all-zero
-`authorKeyDigest` pin requires AUTHOR_KEY_EN to be 0.
+`reportData` carries the freshness and session binding. With `exact` or `prefix`, the Evidence must
+contain the value the Verifier expects, for example a hash of a nonce chosen for this appraisal and
+the Attester's channel key. With `any`, the Evidence may have been produced for another session. An
+all-zero `authorKeyDigest` pin requires AUTHOR_KEY_EN to be 0.
 
-`baseVcekPolicy` and `baseVlekPolicy` construct a policy from four values: the products, a
-non-empty measurement allowlist, a non-zero 64-byte `reportData` value, and a complete TCB floor
-for each product. Both set `minReportVersion` 3, `vmpl` 0, `requireCrl` true,
-`allowProvisionalFirmware` false and `idBlock` any. `baseVlekPolicy` also takes a non-empty
-`cspIds` allowlist; the caller supplies the ASVK and the VLEK CRL as collateral.
+`baseVcekAppraisalPolicy` and `baseVlekAppraisalPolicy` construct an appraisal policy from three
+Reference Values (the products, a non-empty measurement allowlist and a complete TCB floor for each
+product) and a non-zero 64-byte `reportData` value. Both set `minReportVersion` 3, `vmpl` 0,
+`requireCrl` true, `allowProvisionalFirmware` false and `idBlock` any. `baseVlekAppraisalPolicy`
+also takes a non-empty `cspIds` allowlist; the caller supplies the ASVK and the VLEK CRL as
+Endorsements.
 
-## 6. Output
+## 6. Attestation Result
 
 ```
-Attestation {
+AttestationResult {
   identity  { chipId(64) reportId(32) reportIdMa(32) measurement(48) hostData(32) reportData(64) familyId(16) imageId(16) guestSvn vmpl }
   platform  { product productName cpuid? guestPolicy platformInfo tcb{current,committed,reported,launch} firmware{current,committed}
               mitVectors?{launch,current} signer{signingKey,maskChipKey,authorKeyEnabled} idKeyDigest(48) authorKeyDigest(48) }
-  evidence  { reportVersion reportSha256(32) signature{r,s} endorsementKey{sha256,serial,subjectCn,notBefore,notAfter,kind,hwid?,cspId?,tcb}
+  evidence  { reportVersion reportSha256(32) signature{r,s} }
+  endorsements { endorsementKey{sha256,serial,subjectCn,notBefore,notAfter,kind,hwid?,cspId?,tcb}
               ask{sha256,serial,subjectCn,notBefore,notAfter} ark{...} crl?{thisUpdate,nextUpdate,revokedCount} }
-  policyApplied: resolved Policy     verifiedAt: int64
+  appraisalPolicy: resolved AppraisalPolicy     appraisedAt: int64
 }
 ```
 
@@ -215,20 +237,21 @@ AMD's ARKs carry it.
 
 ## 11. Later modules
 
-- **bundle and transport**: a RATS Conceptual Message Wrapper document carrying the report, the
-  VCEK, ASK and ARK certificates, the CRL and an optional epoch value, retrieved through a
+- **bundle and transport**: a RATS Conceptual Message Wrapper document carrying the Evidence, the
+  Endorsements (VCEK, ASK and ARK certificates, CRL) and an optional epoch value, retrieved through a
   `Transport` interface (`request(method, url, headers?, body?) -> { status, headers, body }`),
   which an OHTTP client can implement.
 - **epoch handles**: drand rounds, with BLS signature verification supplied by the caller, and
   Roughtime responses.
 - **mitigations**: a versioned table mapping AMD bulletins to TCB floors and bits, a function
-  that compiles a selection into a `Policy`, and a function that reports which entries an
-  `Attestation` satisfies.
+  that compiles a selection into an `AppraisalPolicy`, and a function that reports which entries
+  an `AttestationResult` satisfies.
 - **cert-table**: parsing of the GHCB extended-report certificate table (GUIDs for VCEK, VLEK,
-  ASK, ARK and CRL) into verifier inputs.
+  ASK, ARK and CRL) into `Endorsements`.
 - **kds**: construction of AMD Key Distribution Service URLs and a cache contract (10-second rate
   limit, `nextUpdate` as time to live) for server-side callers.
-- **measure**: computation of launch measurements for building measurement allowlists.
+- **measure**: computation of launch measurements, the Reference Values for the measurement
+  allowlist.
 - **Venice**: the product table row, TCB layout v2 and the root certificates.
-- **EAR/EAT**: an output mapping to the IETF attestation result formats.
-- **TDX**: Intel TDX quotes under the same result shape.
+- **EAR/EAT**: a mapping of `AttestationResult` to the EAT Attestation Result (EAR) format.
+- **TDX**: Intel TDX quotes as Evidence, under the same Attestation Result shape.

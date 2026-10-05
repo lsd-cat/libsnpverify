@@ -63,7 +63,7 @@ export function decodeGuestPolicy(raw: bigint): GuestPolicy {
     singleSocket: bit(20), cxlAllowed: bit(21), memAes256Xts: bit(22), raplDisabled: bit(23), ciphertextHidingDram: bit(24), pageSwapDisabled: bit(25) };
 }
 
-/** Bits this library knows. Unknown set bits are a policy matter (Policy.platformInfo.allowUnknownBits). */
+/** Bits this library knows. Unknown set bits are a policy matter (AppraisalPolicy.platformInfo.allowUnknownBits). */
 export const KNOWN_PLATFORM_INFO_BITS = 0xffn;
 
 export function decodePlatformInfo(raw: bigint): PlatformInfo {

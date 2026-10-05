@@ -98,7 +98,7 @@ internal fun decodeGuestPolicy(raw: ULong): GuestPolicy {
     )
 }
 
-/** Bits this library knows. Unknown set bits are a policy matter (Policy.platformInfo.allowUnknownBits). */
+/** Bits this library knows. Unknown set bits are a policy matter (AppraisalPolicy.platformInfo.allowUnknownBits). */
 internal const val KNOWN_PLATFORM_INFO_BITS: ULong = 0xffUL
 
 internal fun decodePlatformInfo(raw: ULong) = PlatformInfo(raw, raw.bit(0), raw.bit(1), raw.bit(2), raw.bit(3), raw.bit(4), raw.bit(5), raw.bit(6), raw.bit(7))

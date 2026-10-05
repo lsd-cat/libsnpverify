@@ -1,4 +1,4 @@
-// Policy definition, defaults and checks. checkPolicy returns all violations.
+// AppraisalPolicy definition, defaults and checks. checkAppraisalPolicy returns all violations.
 import type { ErrorCode, Violation } from './errors.ts';
 import { equal, hex, isZero, copy } from './bytes.ts';
 import { KNOWN_PLATFORM_INFO_BITS, tcbAtLeast, type FirmwareVersion, type Product, type Report, type TcbVersion } from './report.ts';
@@ -10,7 +10,7 @@ export type Bit = 'required' | 'forbidden' | 'any';
 export type ReportDataPin = { kind: 'exact'; value: Uint8Array } | { kind: 'prefix'; value: Uint8Array } | { kind: 'any' };
 export type IdBlockPin = 'forbid' | 'any' | { idKeyDigest: Uint8Array; authorKeyDigest?: Uint8Array };
 
-export interface Policy {
+export interface AppraisalPolicy {
   products?: Product[];                        // default ['Genoa', 'Turin']
   signingKey?: 'VCEK' | 'VLEK' | 'any';        // default 'VCEK'
   allowMaskedChipId?: boolean;                 // default false
@@ -45,9 +45,9 @@ export interface Policy {
   idBlock?: IdBlockPin;                        // default 'forbid'
 }
 
-/** Policy with defaults filled in; recorded in the result as policyApplied. */
-export type ResolvedPolicy = Required<Omit<Policy, 'hostData' | 'familyId' | 'imageId' | 'reportId' | 'minLaunchMitVector' | 'minCurrentMitVector' | 'chipIds' | 'endorsementKeyFingerprints' | 'cspIds'>>
-  & Pick<Policy, 'hostData' | 'familyId' | 'imageId' | 'reportId' | 'minLaunchMitVector' | 'minCurrentMitVector' | 'chipIds' | 'endorsementKeyFingerprints' | 'cspIds'>;
+/** AppraisalPolicy with defaults filled in; recorded in the result as appraisalPolicy. */
+export type ResolvedAppraisalPolicy = Required<Omit<AppraisalPolicy, 'hostData' | 'familyId' | 'imageId' | 'reportId' | 'minLaunchMitVector' | 'minCurrentMitVector' | 'chipIds' | 'endorsementKeyFingerprints' | 'cspIds'>>
+  & Pick<AppraisalPolicy, 'hostData' | 'familyId' | 'imageId' | 'reportId' | 'minLaunchMitVector' | 'minCurrentMitVector' | 'chipIds' | 'endorsementKeyFingerprints' | 'cspIds'>;
 
 class Invalid extends Error {}
 const need = (cond: boolean, msg: string) => { if (!cond) throw new Invalid(msg); };
@@ -69,7 +69,7 @@ const POLICY_KEYS = [
 ];
 
 /** Fill defaults and validate shapes. A malformed policy yields a POLICY_INVALID violation. */
-export function resolvePolicy(p: Policy): ResolvedPolicy | Violation {
+export function resolveAppraisalPolicy(p: AppraisalPolicy): ResolvedAppraisalPolicy | Violation {
   try {
     need(p !== null && typeof p === 'object' && !Array.isArray(p), 'policy must be an object');
     keys(p, POLICY_KEYS, '');
@@ -173,16 +173,16 @@ export function resolvePolicy(p: Policy): ResolvedPolicy | Violation {
   }
 }
 
-export interface PolicyContext { tcb: Tcbs; crlPresent: boolean; leafFingerprint: Uint8Array }
+export interface AppraisalContext { tcb: Tcbs; crlPresent: boolean; leafFingerprint: Uint8Array }
 
 /** Check a signature-verified report against the policy. Empty array = satisfied. */
-export function checkPolicy(report: Report, ek: EndorsementKey, ctx: PolicyContext, policy: Policy): Violation[] {
-  const p = resolvePolicy(policy);
+export function checkAppraisalPolicy(report: Report, ek: EndorsementKey, ctx: AppraisalContext, policy: AppraisalPolicy): Violation[] {
+  const p = resolveAppraisalPolicy(policy);
   if ('code' in p) return [p];
-  return checkResolvedPolicy(report, ek, ctx, p);
+  return checkResolvedAppraisalPolicy(report, ek, ctx, p);
 }
 
-export function checkResolvedPolicy(report: Report, ek: EndorsementKey, ctx: PolicyContext, p: ResolvedPolicy): Violation[] {
+export function checkResolvedAppraisalPolicy(report: Report, ek: EndorsementKey, ctx: AppraisalContext, p: ResolvedAppraisalPolicy): Violation[] {
   const v: Violation[] = [];
   const bad = (code: ErrorCode, message: string, field?: string) => v.push(field ? { code, message, field } : { code, message });
   const bit = (code: ErrorCode, field: string, want: Bit | undefined, got: boolean) => {

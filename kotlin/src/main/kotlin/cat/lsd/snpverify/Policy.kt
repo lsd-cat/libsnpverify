@@ -1,6 +1,6 @@
 package cat.lsd.snpverify
 
-// Policy definition, defaults and checks. checkPolicy returns all violations. Mirrors ts/src/policy.ts.
+// AppraisalPolicy definition, defaults and checks. checkAppraisalPolicy returns all violations. Mirrors ts/src/policy.ts.
 
 enum class Bit { REQUIRED, FORBIDDEN, ANY }
 
@@ -49,7 +49,7 @@ data class PlatformInfoRules(
 )
 
 /** Null means "use the default" (SPEC §5). `measurement` is required. */
-data class Policy(
+data class AppraisalPolicy(
     val measurement: MeasurementPin,
     val products: List<Product>? = null,
     val signingKey: SigningKeyPolicy? = null,
@@ -78,8 +78,8 @@ data class Policy(
     val idBlock: IdBlockPin? = null,
 )
 
-/** Policy with defaults filled in; recorded in the result as policyApplied. */
-data class ResolvedPolicy(
+/** AppraisalPolicy with defaults filled in; recorded in the result as appraisalPolicy. */
+data class ResolvedAppraisalPolicy(
     val products: List<Product>,
     val signingKey: SigningKeyPolicy,
     val allowMaskedChipId: Boolean,
@@ -114,7 +114,7 @@ private fun need(cond: Boolean, msg: String) {
 private fun len(v: ByteArray?, n: Int, what: String) = need(v == null || v.size == n, "policy.$what must be $n bytes")
 
 /** Fill defaults and validate shapes. Returns Result.Err(POLICY_INVALID) on a malformed policy. */
-fun resolvePolicy(p: Policy): Result<ResolvedPolicy> = try {
+fun resolveAppraisalPolicy(p: AppraisalPolicy): Result<ResolvedAppraisalPolicy> = try {
     (p.measurement as? MeasurementPin.Allowlist)?.let {
         need(it.values.isNotEmpty(), "policy.measurement must be a nonempty allowlist or Any");
         it.values.forEach { m -> len(m, 48, "measurement[]") }
@@ -151,7 +151,7 @@ fun resolvePolicy(p: Policy): Result<ResolvedPolicy> = try {
     val minTcb = p.minTcb ?: emptyMap()
     val g = p.guestPolicy ?: GuestPolicyRules()
     Result.Ok(
-        ResolvedPolicy(
+        ResolvedAppraisalPolicy(
             products = p.products ?: listOf(Product.Genoa, Product.Turin),
             signingKey = p.signingKey ?: SigningKeyPolicy.VCEK,
             allowMaskedChipId = p.allowMaskedChipId ?: false,
@@ -187,18 +187,18 @@ fun resolvePolicy(p: Policy): Result<ResolvedPolicy> = try {
     Result.Err(Violation(ErrorCode.POLICY_INVALID, e.message ?: "invalid policy"))
 }
 
-data class PolicyContext(val tcb: Tcbs, val crlPresent: Boolean, val leafFingerprint: ByteArray)
+data class AppraisalContext(val tcb: Tcbs, val crlPresent: Boolean, val leafFingerprint: ByteArray)
 
 /** Check a signature-verified report against the policy. Empty list = satisfied. */
-fun checkPolicy(report: Report, ek: EndorsementKey, ctx: PolicyContext, policy: Policy): List<Violation> {
-    val p = when (val r = resolvePolicy(policy)) {
+fun checkAppraisalPolicy(report: Report, ek: EndorsementKey, ctx: AppraisalContext, policy: AppraisalPolicy): List<Violation> {
+    val p = when (val r = resolveAppraisalPolicy(policy)) {
         is Result.Err -> return listOf(r.error);
         is Result.Ok -> r.value
     }
-    return checkResolvedPolicy(report, ek, ctx, p)
+    return checkResolvedAppraisalPolicy(report, ek, ctx, p)
 }
 
-internal fun checkResolvedPolicy(report: Report, ek: EndorsementKey, ctx: PolicyContext, p: ResolvedPolicy): List<Violation> {
+internal fun checkResolvedAppraisalPolicy(report: Report, ek: EndorsementKey, ctx: AppraisalContext, p: ResolvedAppraisalPolicy): List<Violation> {
     val v = ArrayList<Violation>()
     fun bad(code: ErrorCode, message: String, field: String? = null) {
         v.add(Violation(code, message, field))

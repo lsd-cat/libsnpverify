@@ -1,9 +1,9 @@
-# Attacks on SEV-SNP and the policy fields that address them
+# Attacks on SEV-SNP and the appraisal policy fields that address them
 
 The table lists published attacks on SEV-SNP. For each attack it gives the reference, the AMD
-advisory where one exists, the `Policy` field that enforces the mitigation, and the products on
-which the field exists. TCB floor numbers are not listed. They come from the AMD bulletin for
-the product and firmware in use.
+advisory where one exists, the `AppraisalPolicy` field that enforces the mitigation, and the
+products on which the field exists. TCB floor numbers are not listed. They come from the AMD
+bulletin for the product and firmware in use.
 
 | Attack | Reference | Advisory | Policy field | Products |
 |---|---|---|---|---|
@@ -36,9 +36,9 @@ allows several products sets such bits only when every product in the list has t
 Where a mitigation also requires a guest OS update or a host restart, the report does not carry
 that state.
 
-## Recommended policy, 2026-10-04
+## Recommended appraisal policy, 2026-10-04
 
-The policy below sets every field in the table. It accepts Genoa and Turin. It excludes Milan for
+The appraisal policy below sets every field in the table. It accepts Genoa and Turin. It excludes Milan for
 two reasons: the root seed extraction result, and the absence of ciphertext hiding and RAPL
 control on Milan. Fields whose value depends on the deployment are marked in the code.
 
@@ -50,7 +50,7 @@ deployment takes them from the AMD bulletin, because this repository has no Turi
 observe.
 
 ```ts
-const policy: Policy = {
+const policy: AppraisalPolicy = {
   // deployment values
   measurement: [/* approved launch digests */],
   reportData: { kind: 'exact', value: sessionBinding },   // SHA-512 of nonce and channel key, per session
@@ -97,7 +97,7 @@ const policy: Policy = {
 ```
 
 ```kotlin
-val policy = Policy(
+val policy = AppraisalPolicy(
     measurement = MeasurementPin.Allowlist(approvedDigests),
     reportData = ReportDataPin.Exact(sessionBinding),
     chipIds = operatedChipIds,
@@ -113,6 +113,6 @@ val policy = Policy(
 )
 ```
 
-This policy does not address dynamic memory interposers, cache and page-fault side channels,
+This appraisal policy does not address dynamic memory interposers, cache and page-fault side channels,
 performance counters on Genoa, or any condition that depends on guest OS state absent from the
 report. The measurement allowlist and the choice of hosting are the controls for those.

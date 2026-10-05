@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 
 class ConformanceTest {
     private val crypto = JcaCryptoProvider()
-    private val baseline = Policy(MeasurementPin.Any, vmplAny = true, products = listOf(Product.Milan, Product.Genoa, Product.Turin))
+    private val baseline = AppraisalPolicy(MeasurementPin.Any, vmplAny = true, products = listOf(Product.Milan, Product.Genoa, Product.Turin))
     private val hardened = baseline.copy(
         allowMaskedChipId = true,
         minTcb = mapOf(Product.Genoa to TcbFloor(snp = 14)),
@@ -20,7 +20,7 @@ class ConformanceTest {
     )
     private val hardenedPlatform = PlatformInfoRules(tsmeEnabled = Bit.REQUIRED, eccEnabled = Bit.REQUIRED, raplDisabled = Bit.REQUIRED, ciphertextHidingEnabled = Bit.REQUIRED, aliasCheckComplete = Bit.REQUIRED, tioEnabled = Bit.REQUIRED)
 
-    private fun tinfoilCode(r: VerifyResult.Err): String {
+    private fun tinfoilCode(r: AppraisalResult.Err): String {
         val v = r.violations[0]
         return when (v.code) {
             ErrorCode.REPORT_TRUNCATED -> "REPORT_TRUNCATED";
@@ -83,24 +83,26 @@ class ConformanceTest {
             }
             val ark = if (synthetic) pemToDer(input["amd_root_ca_pem"].asString)[0] else null
             val verifier = SnpVerifier(crypto, trustedArks = ark?.let { listOf(it) })
-            val result = verifier.verify(
-                VerifyInput(
-                    report = report,
-                    vcek = fromBase64(input["vcek_der_b64"].asString),
-                    ask = if (input.has("ask_pem")) pemToDer(input["ask_pem"].asString)[0] else null,
-                    ark = ark,
+            val result = verifier.appraise(
+                AppraisalInput(
+                    evidence = report,
+                    endorsements = Endorsements(
+                        vcek = fromBase64(input["vcek_der_b64"].asString),
+                        ask = if (input.has("ask_pem")) pemToDer(input["ask_pem"].asString)[0] else null,
+                        ark = ark,
+                    ),
                     now = if (input.has("expiration_check_date_unix")) input["expiration_check_date_unix"].asLong else 1780272000L,
                     policy = policy,
                 )
             )
             if (exit == 0) {
-                assertTrue(result is VerifyResult.Ok, "expected accept, got ${(result as? VerifyResult.Err)?.violations}")
+                assertTrue(result is AppraisalResult.Ok, "expected accept, got ${(result as? AppraisalResult.Err)?.violations}")
                 val expected = Fixtures.json(dir.resolve("expected.json"))
                 val want = expected.getAsJsonObject("outputs")?.getAsJsonObject("measurement")?.getAsJsonArray("registers")?.get(0)?.asString
-                if (want != null) assertEquals(want, (result as VerifyResult.Ok).attestation.identity.measurement.hex())
+                if (want != null) assertEquals(want, (result as AppraisalResult.Ok).attestationResult.identity.measurement.hex())
             } else {
-                assertTrue(result is VerifyResult.Err, "expected rejection, got accept")
-                val err = result as VerifyResult.Err
+                assertTrue(result is AppraisalResult.Err, "expected rejection, got accept")
+                val err = result as AppraisalResult.Err
                 if (codes.isNotEmpty()) assertTrue(tinfoilCode(err) in codes, "code ${tinfoilCode(err)} (${err.violations[0]}) not in $codes")
             }
         }
@@ -122,13 +124,10 @@ class ConformanceTest {
                 return@dynamicTest
             }
             val ark = pemToDer(input["amd_root_ca_pem"].asString)[0]
-            val result = SnpVerifier(crypto, listOf(ark)).verify(
-                VerifyInput(
-                    report = fromBase64(doc.getAsJsonObject("cpu_evidence")["report_base64"].asString),
-                    vcek = fromBase64(vcekB64),
-                    ask = chain[0],
-                    ark = chain[1],
-                    crl = fromBase64(crlB64),
+            val result = SnpVerifier(crypto, listOf(ark)).appraise(
+                AppraisalInput(
+                    evidence = fromBase64(doc.getAsJsonObject("cpu_evidence")["report_base64"].asString),
+                    endorsements = Endorsements(vcek = fromBase64(vcekB64), ask = chain[0], ark = chain[1], crl = fromBase64(crlB64)),
                     now = System.currentTimeMillis() / 1000,
                     policy = baseline.copy(requireCrl = true, minReportVersion = 3),
                 )
@@ -136,10 +135,10 @@ class ConformanceTest {
             // Older synthetic happy vector has a v3 CRL issuer without keyUsage.
             // RFC 10007 requires cRLSign, so the hardened verifier rejects it.
             if (file.name == "sev-happy.json") {
-                assertEquals(ErrorCode.CRL_INVALID, (result as VerifyResult.Err).violations[0].code)
+                assertEquals(ErrorCode.CRL_INVALID, (result as AppraisalResult.Err).violations[0].code)
                 return@dynamicTest
             }
-            assertEquals(expectedAccept, result is VerifyResult.Ok, (result as? VerifyResult.Err)?.violations.toString())
+            assertEquals(expectedAccept, result is AppraisalResult.Ok, (result as? AppraisalResult.Err)?.violations.toString())
         }
     }
 }
