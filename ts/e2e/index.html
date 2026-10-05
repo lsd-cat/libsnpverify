@@ -12,9 +12,9 @@
     const [ask, ark] = pemToDer(await get('/vectors/kds/Genoa.cert_chain.pem', 'text'));
     const verifier = new SnpVerifier();
     const policy = { measurement: [report.slice(0x90, 0xc0)], products: ['Genoa'], requireCrl: true };
-    const ok = await verifier.verify({ report, vcek: fromBase64(input.vcek_der_b64), ask, ark, crl, now: parseCrl(crl).thisUpdate + 60, policy });
+    const ok = await verifier.appraise({ evidence: report, endorsements: { vcek: fromBase64(input.vcek_der_b64), ask, ark, crl }, now: parseCrl(crl).thisUpdate + 60, policy });
     const bad = report.slice(); bad[0x2a0] ^= 1;
-    const rejected = await verifier.verify({ report: bad, vcek: fromBase64(input.vcek_der_b64), ask, ark, crl, now: parseCrl(crl).thisUpdate + 60, policy });
+    const rejected = await verifier.appraise({ evidence: bad, endorsements: { vcek: fromBase64(input.vcek_der_b64), ask, ark, crl }, now: parseCrl(crl).thisUpdate + 60, policy });
     window.__result = { ok: toJson(ok), rejected: toJson(rejected) };
   } catch (e) { window.__result = { error: String(e && e.stack || e) }; }
 </script>

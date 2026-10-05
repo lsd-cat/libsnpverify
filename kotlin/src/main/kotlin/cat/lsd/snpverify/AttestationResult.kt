@@ -1,6 +1,6 @@
 package cat.lsd.snpverify
 
-// The result record (SPEC §6) and its JSON-shaped projection. Mirrors ts/src/attestation.ts.
+// The result record (SPEC §6) and its JSON-shaped projection. Mirrors ts/src/attestation-result.ts.
 
 data class CertSummary(val sha256: ByteArray, val serial: ByteArray, val subjectCn: String, val notBefore: Long, val notAfter: Long)
 data class EndorsementKeySummary(val cert: CertSummary, val kind: SigningKey, val hwid: ByteArray?, val cspId: String?, val tcb: TcbVersion)
@@ -32,34 +32,35 @@ data class Platform(
     val idKeyDigest: ByteArray,
     val authorKeyDigest: ByteArray
 )
-data class Evidence(
-    val reportVersion: Int,
-    val reportSha256: ByteArray,
-    val signature: EcdsaSignature,
-    val endorsementKey: EndorsementKeySummary,
-    val ask: CertSummary,
-    val ark: CertSummary,
-    val crl: CrlInfo?
+data class EvidenceSummary(val reportVersion: Int, val reportSha256: ByteArray, val signature: EcdsaSignature)
+data class EndorsementsSummary(val endorsementKey: EndorsementKeySummary, val ask: CertSummary, val ark: CertSummary, val crl: CrlInfo?)
+data class AttestationResult(
+    val identity: Identity,
+    val platform: Platform,
+    val evidence: EvidenceSummary,
+    val endorsements: EndorsementsSummary,
+    val appraisalPolicy: ResolvedAppraisalPolicy,
+    val appraisedAt: Long
 )
-data class Attestation(val identity: Identity, val platform: Platform, val evidence: Evidence, val policyApplied: ResolvedPolicy, val verifiedAt: Long)
 
-internal fun buildAttestation(report: Report, chain: Chain, tcb: Tcbs, policy: ResolvedPolicy, now: Long, crypto: CryptoProvider): Attestation {
+internal fun buildAttestationResult(report: Report, chain: Chain, tcb: Tcbs, policy: ResolvedAppraisalPolicy, now: Long, crypto: CryptoProvider): AttestationResult {
     fun sum(c: Certificate) = CertSummary(crypto.sha256(c.der), c.serial, c.subjectCN, c.notBefore, c.notAfter)
     val ek = chain.leaf
-    return Attestation(
+    return AttestationResult(
         identity = Identity(report.chipId, report.reportId, report.reportIdMa, report.measurement, report.hostData, report.reportData, report.familyId, report.imageId, report.guestSvn, report.vmpl),
         platform = Platform(
             ek.product, ek.productName, report.cpuid, report.policy, report.platformInfo, tcb, report.currentVersion, report.committedVersion,
             report.launchMitVector, report.currentMitVector, report.signerInfo, report.idKeyDigest, report.authorKeyDigest
         ),
-        evidence = Evidence(report.version, crypto.sha256(report.raw), report.signature, EndorsementKeySummary(sum(ek.cert), ek.kind, ek.hwid, ek.cspId, ek.tcb), sum(chain.intermediate), sum(chain.root), chain.crl),
-        policyApplied = policy,
-        verifiedAt = now,
+        evidence = EvidenceSummary(report.version, crypto.sha256(report.raw), report.signature),
+        endorsements = EndorsementsSummary(EndorsementKeySummary(sum(ek.cert), ek.kind, ek.hwid, ek.cspId, ek.tcb), sum(chain.intermediate), sum(chain.root), chain.crl),
+        appraisalPolicy = policy,
+        appraisedAt = now,
     )
 }
 
 /** JSON-shaped projection: bytes as lowercase hex, unsigned 64-bit as decimal strings, enums as names. Same keys as the TS port. */
-fun toJson(a: Attestation): Map<String, Any?> = mapOf(
+fun toJson(a: AttestationResult): Map<String, Any?> = mapOf(
     "identity" to mapOf(
         "chipId" to a.identity.chipId.hex(),
         "reportId" to a.identity.reportId.hex(),
@@ -125,19 +126,21 @@ fun toJson(a: Attestation): Map<String, Any?> = mapOf(
         "reportVersion" to a.evidence.reportVersion,
         "reportSha256" to a.evidence.reportSha256.hex(),
         "signature" to mapOf("r" to a.evidence.signature.r.hex(), "s" to a.evidence.signature.s.hex()),
+    ),
+    "endorsements" to mapOf(
         "endorsementKey" to (
-            certJson(a.evidence.endorsementKey.cert) + mapOf(
-                "kind" to a.evidence.endorsementKey.kind.name,
-                "hwid" to a.evidence.endorsementKey.hwid?.hex(),
-                "cspId" to a.evidence.endorsementKey.cspId,
-                "tcb" to tcbJson(a.evidence.endorsementKey.tcb),
+            certJson(a.endorsements.endorsementKey.cert) + mapOf(
+                "kind" to a.endorsements.endorsementKey.kind.name,
+                "hwid" to a.endorsements.endorsementKey.hwid?.hex(),
+                "cspId" to a.endorsements.endorsementKey.cspId,
+                "tcb" to tcbJson(a.endorsements.endorsementKey.tcb),
             )
             ),
-        "ask" to certJson(a.evidence.ask),
-        "ark" to certJson(a.evidence.ark),
-        "crl" to a.evidence.crl?.let { mapOf("thisUpdate" to it.thisUpdate, "nextUpdate" to it.nextUpdate, "revokedCount" to it.revokedCount) },
+        "ask" to certJson(a.endorsements.ask),
+        "ark" to certJson(a.endorsements.ark),
+        "crl" to a.endorsements.crl?.let { mapOf("thisUpdate" to it.thisUpdate, "nextUpdate" to it.nextUpdate, "revokedCount" to it.revokedCount) },
     ),
-    "policyApplied" to a.policyApplied.let { p ->
+    "appraisalPolicy" to a.appraisalPolicy.let { p ->
         mapOf(
             "products" to p.products.map { it.name },
             "signingKey" to (if (p.signingKey == SigningKeyPolicy.ANY) "any" else p.signingKey.name),
@@ -202,7 +205,7 @@ fun toJson(a: Attestation): Map<String, Any?> = mapOf(
             },
         )
     },
-    "verifiedAt" to a.verifiedAt,
+    "appraisedAt" to a.appraisedAt,
 ).filterNullsDeep()
 
 private fun bitJson(b: Bit?) = b?.name?.lowercase()

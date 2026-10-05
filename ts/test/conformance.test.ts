@@ -5,14 +5,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
-import { SnpVerifier, fromBase64, fromHex, pemToDer, type Policy, type ErrorCode, type VerifyResult } from '../src/index.ts';
+import { SnpVerifier, fromBase64, fromHex, pemToDer, type AppraisalPolicy, type ErrorCode, type AppraisalResult } from '../src/index.ts';
 
 const VECTORS = path.resolve(import.meta.dirname, '../../vectors');
 const verifier = new SnpVerifier();
 
-const BASELINE: Policy = { measurement: 'any', vmpl: 'any', products: ['Milan', 'Genoa', 'Turin'] };
+const BASELINE: AppraisalPolicy = { measurement: 'any', vmpl: 'any', products: ['Milan', 'Genoa', 'Turin'] };
 // Mirrors the "hardened" expectations encoded by the synthetic fixtures (SPEC §3.7.1 defaults + DECIDE-LATER probes).
-const HARDENED: Policy = {
+const HARDENED: AppraisalPolicy = {
   ...BASELINE,
   allowMaskedChipId: true,
   minTcb: { Genoa: { snp: 14 } },
@@ -21,10 +21,10 @@ const HARDENED: Policy = {
   platformInfo: { tsmeEnabled: 'required' },
 };
 // The 27x probes encode the DECIDE-LATER hardened stance that the rest of the synthetic suite does not satisfy.
-const HARDENED_PLATFORM: Policy['platformInfo'] = { tsmeEnabled: 'required', eccEnabled: 'required', raplDisabled: 'required', ciphertextHidingEnabled: 'required', aliasCheckComplete: 'required', tioEnabled: 'required' };
+const HARDENED_PLATFORM: AppraisalPolicy['platformInfo'] = { tsmeEnabled: 'required', eccEnabled: 'required', raplDisabled: 'required', ciphertextHidingEnabled: 'required', aliasCheckComplete: 'required', tioEnabled: 'required' };
 
 /** Our code -> Tinfoil taxonomy, so vectors that name a code can be asserted. */
-function tinfoilCode(r: VerifyResult & { ok: false }): string {
+function tinfoilCode(r: AppraisalResult & { ok: false }): string {
   const v = r.violations[0];
   const m: Partial<Record<ErrorCode, string>> = {
     REPORT_TRUNCATED: 'REPORT_TRUNCATED', REPORT_VERSION_UNSUPPORTED: 'WRONG_REPORT_VERSION', REPORT_SIGNATURE_INVALID: 'REPORT_SIGNATURE_INVALID',
@@ -56,7 +56,7 @@ for (const name of fs.readdirSync(sevDir).filter(n => /^\d/.test(n)).sort()) {
     const report = new Uint8Array(zlib.gunzipSync(fromBase64(input.attestation_doc_b64)));
     const synthetic = input.amd_root_ca_pem !== undefined;
     const pol = input.policy ?? {};
-    const policy: Policy = {
+    const policy: AppraisalPolicy = {
       ...(synthetic ? HARDENED : BASELINE),
       ...(/^27[0-4]/.test(name) && { platformInfo: HARDENED_PLATFORM }),
       ...(pol.expected_measurement_hex && { measurement: [fromHex(pol.expected_measurement_hex)] }),
@@ -71,16 +71,18 @@ for (const name of fs.readdirSync(sevDir).filter(n => /^\d/.test(n)).sort()) {
       policy.minTcb = { Milan: f, Genoa: f, Turin: f };
     }
     const verifierHere = synthetic ? new SnpVerifier({ trustedArks: [pemToDer(input.amd_root_ca_pem)[0]] }) : verifier;
-    const result = await verifierHere.verify({
-      report, vcek: fromBase64(input.vcek_der_b64),
-      ask: input.ask_pem ? pemToDer(input.ask_pem)[0] : undefined, ark: input.amd_root_ca_pem ? pemToDer(input.amd_root_ca_pem)[0] : undefined,
+    const result = await verifierHere.appraise({
+      evidence: report, endorsements: {
+        vcek: fromBase64(input.vcek_der_b64),
+        ask: input.ask_pem ? pemToDer(input.ask_pem)[0] : undefined, ark: input.amd_root_ca_pem ? pemToDer(input.amd_root_ca_pem)[0] : undefined,
+      },
       now: input.expiration_check_date_unix ?? 1780272000, policy,
     });
     if (exit === 0) {
       assert.ok(result.ok, `expected accept, got ${JSON.stringify(result.ok ? null : result.violations)}`);
       const expected = JSON.parse(fs.readFileSync(path.join(dir, 'expected.json'), 'utf8'));
       const want = expected.outputs?.measurement?.registers?.[0];
-      if (want) assert.equal(Buffer.from(result.attestation.identity.measurement).toString('hex'), want);
+      if (want) assert.equal(Buffer.from(result.attestationResult.identity.measurement).toString('hex'), want);
     } else {
       assert.ok(!result.ok, 'expected rejection, got accept');
       if (codes.length) assert.ok(codes.includes(tinfoilCode(result)), `code ${tinfoilCode(result)} (${result.violations[0].code}: ${result.violations[0].message}) not in ${codes}`);
@@ -101,8 +103,8 @@ for (const file of fs.readdirSync(v3Dir).filter(n => n.endsWith('.json')).sort()
     const structural = !vcekB64 || chain.length !== 2 || !crlB64;
     if (structural) { assert.equal(vec.expected.accepted, false); return; }
     const ark = pemToDer(vec.input.amd_root_ca_pem)[0];
-    const result = await new SnpVerifier({ trustedArks: [ark] }).verify({
-      report: fromBase64(doc.cpu_evidence.report_base64), vcek: fromBase64(vcekB64), ask: chain[0], ark: chain[1], crl: fromBase64(crlB64),
+    const result = await new SnpVerifier({ trustedArks: [ark] }).appraise({
+      evidence: fromBase64(doc.cpu_evidence.report_base64), endorsements: { vcek: fromBase64(vcekB64), ask: chain[0], ark: chain[1], crl: fromBase64(crlB64) },
       now: Math.floor(Date.now() / 1000), policy: { ...BASELINE, requireCrl: true, minReportVersion: 3 },
     });
     // This older synthetic happy vector has a v3 CRL issuer without keyUsage.

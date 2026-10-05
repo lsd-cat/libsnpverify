@@ -125,7 +125,7 @@ private fun signedBy(crypto: CryptoProvider, alg: SignatureAlgorithm, signature:
 /** Verify the chain. `trustedRoots` must contain a DER byte-equal to the root used (default: embedded ARK of the leaf's product). */
 fun verifyChain(callerInput: ChainInput, trustedRoots: List<ByteArray>?, crypto: CryptoProvider): Result<Chain> = stage {
     // Check sizes, then copy every input at entry.
-    checkCollateralSizes(callerInput.leaf, callerInput.intermediate, callerInput.root, callerInput.crl)
+    checkEndorsementSizes(callerInput.leaf, callerInput.intermediate, callerInput.root, callerInput.crl)
     val input = ChainInput(callerInput.leaf.copyOf(), callerInput.intermediate?.copyOf(), callerInput.root?.copyOf(), callerInput.crl?.copyOf(), callerInput.now)
     val trustedRoots = trustedRoots?.map { it.copyOf() }
     val leafCert = parseCertificate(input.leaf)
@@ -167,7 +167,7 @@ fun verifyChain(callerInput: ChainInput, trustedRoots: List<ByteArray>?, crypto:
 }
 
 /** Size caps, checked before any copy or parse. */
-internal fun checkCollateralSizes(leaf: ByteArray?, intermediate: ByteArray?, root: ByteArray?, crl: ByteArray?) {
+internal fun checkEndorsementSizes(leaf: ByteArray?, intermediate: ByteArray?, root: ByteArray?, crl: ByteArray?) {
     for ((what, b) in listOf("leaf" to leaf, "intermediate" to intermediate, "root" to root)) {
         if (b != null && b.size > MAX_CERT_BYTES) fail(ErrorCode.CERT_MALFORMED, "$what certificate is ${b.size} bytes, limit $MAX_CERT_BYTES")
     }

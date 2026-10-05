@@ -1,5 +1,50 @@
 {
- "evidence": {
+ "appraisalPolicy": {
+  "allowMaskedChipId": false,
+  "allowProvisionalFirmware": false,
+  "guestPolicy": {
+   "cxlAllowed": "forbidden",
+   "debug": "forbidden",
+   "memAes256Xts": "any",
+   "migrateMa": "forbidden"
+  },
+  "idBlock": "forbid",
+  "measurement": [
+   "09ef32acf90fcfeb6206d1a46c13145cef736ebbb83f18eaff680b686232031546ff5fd39c44599699ee8734cbbeb519"
+  ],
+  "minFirmware": {
+   "build": 0,
+   "major": 0,
+   "minor": 0
+  },
+  "minGuestSvn": 0,
+  "minLaunchTcb": {
+   "Genoa": {
+    "snp": 20
+   }
+  },
+  "minReportVersion": 2,
+  "minTcb": {
+   "Genoa": {
+    "snp": 20
+   }
+  },
+  "platformInfo": {
+   "allowUnknownBits": false
+  },
+  "products": [
+   "Genoa"
+  ],
+  "reportData": {
+   "kind": "prefix",
+   "value": "71c31f35d2b06077bbae7c1ddf0cc402"
+  },
+  "requireCrl": true,
+  "signingKey": "VCEK",
+  "vmpl": 0
+ },
+ "appraisedAt": 1790062353,
+ "endorsements": {
   "ark": {
    "notAfter": 2432129677,
    "notBefore": 1643211277,
@@ -33,7 +78,9 @@
     "snp": 23,
     "tee": 0
    }
-  },
+  }
+ },
+ "evidence": {
   "reportSha256": "42898c8be404c4aa0e4f08186a9390912cb4abf634b18a199403c1d498b84326",
   "reportVersion": 3,
   "signature": {
@@ -131,50 +178,5 @@
     "tee": 0
    }
   }
- },
- "policyApplied": {
-  "allowMaskedChipId": false,
-  "allowProvisionalFirmware": false,
-  "guestPolicy": {
-   "cxlAllowed": "forbidden",
-   "debug": "forbidden",
-   "memAes256Xts": "any",
-   "migrateMa": "forbidden"
-  },
-  "idBlock": "forbid",
-  "measurement": [
-   "09ef32acf90fcfeb6206d1a46c13145cef736ebbb83f18eaff680b686232031546ff5fd39c44599699ee8734cbbeb519"
-  ],
-  "minFirmware": {
-   "build": 0,
-   "major": 0,
-   "minor": 0
-  },
-  "minGuestSvn": 0,
-  "minLaunchTcb": {
-   "Genoa": {
-    "snp": 20
-   }
-  },
-  "minReportVersion": 2,
-  "minTcb": {
-   "Genoa": {
-    "snp": 20
-   }
-  },
-  "platformInfo": {
-   "allowUnknownBits": false
-  },
-  "products": [
-   "Genoa"
-  ],
-  "reportData": {
-   "kind": "prefix",
-   "value": "71c31f35d2b06077bbae7c1ddf0cc402"
-  },
-  "requireCrl": true,
-  "signingKey": "VCEK",
-  "vmpl": 0
- },
- "verifiedAt": 1790062353
+ }
 }

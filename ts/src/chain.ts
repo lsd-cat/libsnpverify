@@ -135,7 +135,7 @@ async function signedBy(crypto: CryptoProvider, signed: { signatureAlgorithm: Ce
 export function verifyChain(callerInput: ChainInput, trustedRoots: Uint8Array[] | undefined, crypto: CryptoProvider): Promise<Result<Chain>> {
   return stageAsync(async () => {
     // Check sizes, then copy every input before the first await.
-    checkCollateralSizes(callerInput);
+    checkEndorsementSizes(callerInput);
     const input: ChainInput = {
       leaf: copy(callerInput.leaf),
       intermediate: callerInput.intermediate && copy(callerInput.intermediate),
@@ -188,7 +188,7 @@ export function verifyChain(callerInput: ChainInput, trustedRoots: Uint8Array[] 
 }
 
 /** Size caps, checked before any copy or parse. */
-export function checkCollateralSizes(c: { leaf?: Uint8Array; intermediate?: Uint8Array; root?: Uint8Array; crl?: Uint8Array }): void {
+export function checkEndorsementSizes(c: { leaf?: Uint8Array; intermediate?: Uint8Array; root?: Uint8Array; crl?: Uint8Array }): void {
   for (const [what, b] of [['leaf', c.leaf], ['intermediate', c.intermediate], ['root', c.root]] as const) {
     if (b && b.length > MAX_CERT_BYTES) fail('CERT_MALFORMED', `${what} certificate is ${b.length} bytes, limit ${MAX_CERT_BYTES}`);
   }
