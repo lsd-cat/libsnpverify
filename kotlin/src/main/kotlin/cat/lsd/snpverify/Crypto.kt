@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 import java.math.BigInteger
 import java.security.KeyFactory

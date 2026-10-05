@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // AMD endorsement chain: ARK (pinned) -> ASK/ASVK -> VCEK/VLEK. VCEK extension parsing (57230). Optional CRL. Mirrors ts/src/chain.ts.
 

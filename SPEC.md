@@ -1,4 +1,4 @@
-# libsnpverify — interface specification (v0.1)
+# snpverify — interface specification (v0.1)
 
 This document defines the interface, the checks and the error codes of the AMD SEV-SNP
 attestation verifier implemented in `ts/` (TypeScript) and `kotlin/` (Kotlin). Both
@@ -218,8 +218,7 @@ AMD's ARKs carry it.
 - **bundle and transport**: a RATS Conceptual Message Wrapper document carrying the report, the
   VCEK, ASK and ARK certificates, the CRL and an optional epoch value, retrieved through a
   `Transport` interface (`request(method, url, headers?, body?) -> { status, headers, body }`),
-  which an OHTTP client can implement. The REPORT_DATA value for the bundle is
-  `SHA-512("libsnpverify/binding/v1" ‖ len(nonce) ‖ nonce ‖ len(binding) ‖ binding)`.
+  which an OHTTP client can implement.
 - **epoch handles**: drand rounds, with BLS signature verification supplied by the caller, and
   Roughtime responses.
 - **mitigations**: a versioned table mapping AMD bulletins to TCB floors and bits, a function

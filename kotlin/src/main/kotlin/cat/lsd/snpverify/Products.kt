@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // The product table. Mirrors ts/src/products.ts.
 data class CpuidRange(val family: Int, val modelMin: Int, val modelMax: Int)

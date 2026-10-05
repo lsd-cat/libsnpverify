@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // Mutation and API tests on the real Genoa fixture and the KDS CRL snapshot. Mirrors ts/test/mutation.test.ts.
 import org.bouncycastle.jce.provider.BouncyCastleProvider

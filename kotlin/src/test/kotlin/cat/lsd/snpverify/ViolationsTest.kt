@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // Cross-port violation vector: the cases in ts/test/violations.test.ts, compared against vectors/expected-violations.json.
 import com.google.gson.Gson

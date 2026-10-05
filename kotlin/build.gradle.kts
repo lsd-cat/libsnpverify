@@ -6,7 +6,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
-group = "sh.lsd"
+group = "cat.lsd"
 version = "0.1.0"
 
 repositories { mavenCentral() }
@@ -35,7 +35,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-            artifactId = "libsnpverify-kt"
+            artifactId = "snpverify"
             pom {
                 licenses {
                     license {

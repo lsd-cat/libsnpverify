@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 /** Caller-maintained reference values; reportData must bind a fresh session. */
 data class BasePolicyConfig(

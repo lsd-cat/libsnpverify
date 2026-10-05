@@ -1,6 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>libsnpverify browser test</title>
+<title>snpverify browser test</title>
 <script type="module">
   import { SnpVerifier, fromBase64, pemToDer, parseCrl, toJson } from '/ts/dist/index.js';
   const get = async (p, kind) => { const r = await fetch(p); return kind === 'json' ? r.json() : kind === 'text' ? r.text() : new Uint8Array(await r.arrayBuffer()); };

@@ -1,1 +1,1 @@
-rootProject.name = "libsnpverify-kt"
+rootProject.name = "snpverify"

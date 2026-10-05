@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 import java.util.Base64
 

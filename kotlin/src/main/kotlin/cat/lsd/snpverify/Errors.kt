@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 /** Error codes. The set is shared with the TypeScript port and is not extended per port. */
 enum class ErrorCode {

@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // Bind the endorsement key to the report, then verify the report signature. Mirrors ts/src/bind.ts.
 data class Tcbs(val current: TcbVersion, val committed: TcbVersion, val reported: TcbVersion, val launch: TcbVersion)

@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser

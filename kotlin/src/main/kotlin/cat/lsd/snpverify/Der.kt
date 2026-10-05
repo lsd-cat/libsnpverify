@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // DER reader and X.509 certificate / CRL parser for AMD's ARK, ASK, VCEK, VLEK certificates and KDS CRLs. Mirrors ts/src/der.ts.
 

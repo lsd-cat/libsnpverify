@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // Runs the Tinfoil conformance vectors through SnpVerifier. Mirrors ts/test/conformance.test.ts exactly.
 import com.google.gson.JsonObject

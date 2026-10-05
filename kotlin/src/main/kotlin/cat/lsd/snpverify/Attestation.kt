@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // The result record (SPEC §6) and its JSON-shaped projection. Mirrors ts/src/attestation.ts.
 
