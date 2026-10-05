@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // Regression cases: policy validation, input ownership, certificate purpose, CRL rules, masked CHIP_ID, VLEK. Mirrors ts/test/regression.test.ts.
 import kotlin.test.Test

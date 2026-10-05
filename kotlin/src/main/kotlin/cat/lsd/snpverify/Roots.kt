@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // AMD root certificates (ASK, ARK) per product, byte-identical to ts/src/roots.ts. Generated: do not edit by hand.
 data class ProductRoots(val ask: ByteArray, val ark: ByteArray)

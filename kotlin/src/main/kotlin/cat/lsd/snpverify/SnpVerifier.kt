@@ -1,6 +1,6 @@
-package snpverify
+package cat.lsd.snpverify
 
-// libsnpverify-kt: AMD SEV-SNP attestation report verification.
+// snpverify: AMD SEV-SNP attestation report verification.
 //
 //   val verifier = SnpVerifier(JcaCryptoProvider())
 //   when (val r = verifier.verify(VerifyInput(report, vcek, crl = crl, now = now, policy = Policy(MeasurementPin.Allowlist(listOf(m)))))) {

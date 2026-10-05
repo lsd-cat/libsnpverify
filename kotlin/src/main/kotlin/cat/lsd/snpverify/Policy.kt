@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // Policy definition, defaults and checks. checkPolicy returns all violations. Mirrors ts/src/policy.ts.
 

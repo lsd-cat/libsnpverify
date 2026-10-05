@@ -1,10 +1,10 @@
-# libsnpverify
+# snpverify
 
 A library that verifies AMD SEV-SNP attestation reports. It has a TypeScript implementation for
 browsers and Node and a Kotlin implementation for the JVM and Android. Both follow [SPEC.md](SPEC.md)
 and are tested against the same vectors.
 
-| | TypeScript (`ts/`, npm `libsnpverify-ts`) | Kotlin (`kotlin/`, artifact `libsnpverify-kt`) |
+| | TypeScript (`ts/`, npm `snpverify`) | Kotlin (`kotlin/`, artifact `snpverify`) |
 |---|---|---|
 | crypto | WebCrypto, or a `CryptoProvider` | `JcaCryptoProvider()`, or `JcaCryptoProvider(BouncyCastleProvider())` |
 | runtime dependencies | none | none |
@@ -31,7 +31,7 @@ report and the certificates and supplies the time.
 ## TypeScript
 
 ```ts
-import { SnpVerifier, baseVcekPolicy } from 'libsnpverify-ts';
+import { SnpVerifier, baseVcekPolicy } from 'snpverify';
 
 const verifier = new SnpVerifier();                     // WebCrypto, embedded AMD certificates
 const policy = baseVcekPolicy({

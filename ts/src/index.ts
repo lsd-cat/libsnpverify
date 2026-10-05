@@ -1,4 +1,4 @@
-// libsnpverify-ts: AMD SEV-SNP attestation report verification.
+// snpverify: AMD SEV-SNP attestation report verification.
 //
 //   const verifier = new SnpVerifier();                     // WebCrypto, embedded AMD roots
 //   const result = await verifier.verify({ report, vcek, crl, now, policy: { measurement: [m], reportData: { kind: 'prefix', value: nonce } } });

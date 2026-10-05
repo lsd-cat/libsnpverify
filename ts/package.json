@@ -1,5 +1,5 @@
 {
-  "name": "libsnpverify-ts",
+  "name": "snpverify",
   "version": "0.1.0",
   "description": "AMD SEV-SNP attestation report verifier for browsers and Node. Pure TypeScript on WebCrypto, no dependencies.",
   "license": "GPL-3.0-or-later",
@@ -37,7 +37,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lsd-cat/libsnpverify",
+    "url": "https://github.com/lsd-cat/snpverify",
     "directory": "ts"
   }
 }

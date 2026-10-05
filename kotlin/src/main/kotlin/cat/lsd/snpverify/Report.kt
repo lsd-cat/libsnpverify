@@ -1,4 +1,4 @@
-package snpverify
+package cat.lsd.snpverify
 
 // ATTESTATION_REPORT parsing (AMD 56860), report versions 2 to 5. Mirrors ts/src/report.ts.
 
