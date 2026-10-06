@@ -2,13 +2,14 @@
 
 A library that appraises AMD SEV-SNP attestation reports, in the role of a Verifier as defined by
 the RATS architecture ([RFC 9334](https://www.rfc-editor.org/rfc/rfc9334)). It has a TypeScript
-implementation for browsers and Node and a Kotlin implementation for the JVM and Android. Both
-follow [SPEC.md](SPEC.md) and are tested against the same vectors.
+implementation for browsers and Node, a Kotlin implementation for the JVM and Android, a Go
+implementation and a Rust implementation. All four follow [SPEC.md](SPEC.md) and are tested against
+the same vectors.
 
-| | TypeScript (`ts/`, npm `snpverify`) | Kotlin (`kotlin/`, artifact `snpverify`) |
-|---|---|---|
-| crypto | WebCrypto, or a `CryptoProvider` | `JcaCryptoProvider()`, or `JcaCryptoProvider(BouncyCastleProvider())` |
-| runtime dependencies | none | none |
+| | TypeScript (`ts/`, npm `snpverify`) | Kotlin (`kotlin/`, artifact `snpverify`) | Go (`go/`, module `github.com/lsd-cat/snpverify/go`) | Rust (`rust/`, crate `snpverify`) |
+|---|---|---|---|---|
+| crypto | WebCrypto, or a `CryptoProvider` | `JcaCryptoProvider()`, or `JcaCryptoProvider(BouncyCastleProvider())` | `StdCrypto{}` (standard library), or a `CryptoProvider` | `RingCrypto` (`ring`), or a `CryptoProvider` |
+| runtime dependencies | none | `org.json` | none | `ring`, `base64`, `serde_json` |
 
 Inputs to an appraisal:
 
@@ -79,6 +80,63 @@ cd kotlin
 ./gradlew ktlintCheck detekt test   # requires JDK 21; the artifact targets JVM 11 (Android API 26 and later)
 ```
 
+## Go
+
+```go
+import snp "github.com/lsd-cat/snpverify/go"
+
+verifier := snp.NewVerifier(snp.VerifierOptions{})         // standard-library crypto, embedded AMD certificates
+policy, err := snp.BaseVCEKAppraisalPolicy(snp.BaseAppraisalPolicyConfig{
+    Products: []snp.Product{snp.Genoa}, Measurements: [][]byte{launchDigest}, ReportData: sessionBinding,
+    MinTCB: map[snp.Product]snp.TCBFloor{snp.Genoa: {Bootloader: 10, TEE: 0, SNP: 23, Microcode: 84}}})
+result, err := verifier.Appraise(snp.AppraisalInput{
+    Evidence: report, Endorsements: snp.Endorsements{VCEK: vcek, CRL: crl}, Now: time.Now().Unix(), Policy: policy})
+var failed *snp.AppraisalError
+if errors.As(err, &failed) {
+    failed.Stage; failed.Violations                           // each violation names its field
+} else {
+    result.Identity.ReportID; result.Evidence.ReportSHA256; result.AppraisalPolicy
+}
+```
+
+```sh
+cd go
+go vet ./... && go test ./...      # requires Go 1.26 or later
+```
+
+## Rust
+
+```rust
+use snpverify::*;
+
+let verifier = SnpVerifier::default();                    // ring crypto, embedded AMD certificates
+let policy = base_vcek_appraisal_policy(&BaseAppraisalPolicyConfig {
+    products: vec![Product::Genoa], measurements: vec![launch_digest], report_data: session_binding,
+    min_tcb: BTreeMap::from([(Product::Genoa, TcbFloor { bootloader: Some(10), tee: Some(0), snp: Some(23), microcode: Some(84), fmc: None })]),
+})?;
+match verifier.appraise(&AppraisalInput { evidence: report, endorsements: Endorsements { vcek, crl: Some(crl), ..Default::default() }, now, policy }) {
+    Ok(a) => { a.identity.report_id; a.evidence.report_sha256; a.appraisal_policy; }
+    Err(e) => { e.stage; e.violations; }                   // each violation names its field
+}
+```
+
+```sh
+cd rust
+cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test   # requires Rust 1.82 or later
+```
+
+The Rust API uses `Result` and `?` instead of a thrown `Fail`, `Option` for every nullable field,
+enums for the pins (`MeasurementPin::Allowlist`, `ReportDataPin::Prefix`, `IdBlockPin::Any`), and
+builds a policy with `AppraisalPolicy { products: Some(..), ..AppraisalPolicy::new(measurement) }`.
+Parsed records hand out borrowed slices, so immutability between stages comes from the type system.
+Rust has no standard-library crypto, so the default provider is `ring`.
+
+The Go API follows the same files and function names as the other two ports, with Go conventions
+where the language asks for them: `(value, error)` returns instead of a `Result` type, Go
+initialisms (`ChipID`, `TCBVersion`, `VCEK`), `Verifier` instead of `SnpVerifier`, the sum types
+`MeasurementPin`, `ReportDataPin` and `IDBlockPin` as small interfaces, pointers for optional numbers
+(`TCBFloor{SNP: new(23)}`), and zero-valued flags meaning "use the default".
+
 ## Appraisal policy
 
 An `AppraisalPolicy` holds the Reference Values and the conditions the Evidence must satisfy. The
@@ -95,6 +153,13 @@ fields fall into four groups.
 bits, require VMPL 0, require the committed firmware to equal the running firmware, forbid an ID
 block and accept the products Genoa and Turin. Every other field defaults to `any`. The resolved
 policy is part of the result as `attestationResult.appraisalPolicy`. SPEC §5 lists every field.
+
+A policy is also a JSON document with the same keys, in the encoding the result uses for
+`appraisalPolicy`: bytes as hex strings, 64-bit values as decimal strings, enumerations as
+strings, and an ignored `$comment` key in any object. `appraisalPolicyFromJson` loads it in every
+port and reports a malformed document as `POLICY_INVALID` with the same message everywhere;
+`vectors/policy.json` pins both. One document therefore serves the browser, Android, Go and Rust
+verifiers of a deployment. [MITIGATIONS.md](MITIGATIONS.md) ends with a complete one.
 
 `baseVcekAppraisalPolicy` and `baseVlekAppraisalPolicy` build an appraisal policy from four
 deployment values: the products, the measurements, the session binding and the TCB floors. They set
@@ -117,7 +182,7 @@ CounterSEVeillance), guest-kernel attacks that only a measurement allowlist addr
 WeSee, BadAML), protocol conditions (replay, relay, host-requested reports, revoked keys, firmware
 rollback), the Milan root-seed extraction, and the attacks the report cannot show (memory
 interposers, cache side channels). The document ends with a complete appraisal policy, dated, that
-sets every field named in the table, in both languages.
+sets every field named in the table, as one JSON document that every port loads.
 
 ## Acknowledgement
 
