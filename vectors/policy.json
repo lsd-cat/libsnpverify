@@ -1,0 +1,1606 @@
+{
+ "minimal": {
+  "policy": {
+   "measurement": "any"
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": 0,
+   "minReportVersion": 2,
+   "minGuestSvn": 0,
+   "minTcb": {},
+   "minLaunchTcb": {},
+   "minFirmware": {
+    "major": 0,
+    "minor": 0,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   },
+   "idBlock": "forbid"
+  }
+ },
+ "mitigations-recommended": {
+  "policy": {
+   "$comment": "snpverify appraisal policy, 2026-10-04. Replace measurement and reportData with deployment values; add chipIds for machines you operate.",
+   "measurement": [
+    "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   ],
+   "reportData": {
+    "$comment": "SHA-512 of nonce and channel key, per session",
+    "kind": "exact",
+    "value": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   },
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": true,
+   "minReportVersion": 3,
+   "vmpl": 0,
+   "idBlock": "forbid",
+   "guestPolicy": {
+    "$comment": "smt: StackWarp, CounterSEVeillance; relax to any if the host cannot disable SMT. ciphertextHidingDram: CipherLeaks, Heracles. pageSwapDisabled: Heracles; needs ABI 1.58 firmware. raplDisabled: PwrLeak.",
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "smt": "forbidden",
+    "ciphertextHidingDram": "required",
+    "pageSwapDisabled": "required",
+    "raplDisabled": "required",
+    "memAes256Xts": "any",
+    "singleSocket": "any"
+   },
+   "platformInfo": {
+    "$comment": "smtEnabled: with guestPolicy.smt. aliasCheckComplete: BadRAM. iommuWriteSafe: SB-3016; needs the host OS update as well.",
+    "smtEnabled": "forbidden",
+    "aliasCheckComplete": "required",
+    "iommuWriteSafe": "required",
+    "ciphertextHidingEnabled": "required",
+    "raplDisabled": "required",
+    "tsmeEnabled": "any",
+    "eccEnabled": "any",
+    "tioEnabled": "any",
+    "allowUnknownBits": false
+   },
+   "minTcb": {
+    "$comment": "Genoa: observed 2026-01; raise per bulletin. Turin: placeholders, fill from the Turin bulletin.",
+    "Genoa": {
+     "bootloader": 10,
+     "tee": 0,
+     "snp": 23,
+     "microcode": 84
+    },
+    "Turin": {
+     "fmc": 0,
+     "bootloader": 0,
+     "tee": 0,
+     "snp": 0,
+     "microcode": 0
+    }
+   },
+   "minFirmware": {
+    "$comment": "ABI 1.58 for the page-swap bit",
+    "major": 1,
+    "minor": 58,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": true,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "smt": "forbidden",
+    "ciphertextHidingDram": "required",
+    "pageSwapDisabled": "required",
+    "raplDisabled": "required",
+    "memAes256Xts": "any",
+    "singleSocket": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false,
+    "smtEnabled": "forbidden",
+    "aliasCheckComplete": "required",
+    "iommuWriteSafe": "required",
+    "ciphertextHidingEnabled": "required",
+    "raplDisabled": "required",
+    "tsmeEnabled": "any",
+    "eccEnabled": "any",
+    "tioEnabled": "any"
+   },
+   "vmpl": 0,
+   "minReportVersion": 3,
+   "minGuestSvn": 0,
+   "minTcb": {
+    "Genoa": {
+     "bootloader": 10,
+     "tee": 0,
+     "snp": 23,
+     "microcode": 84
+    },
+    "Turin": {
+     "fmc": 0,
+     "bootloader": 0,
+     "tee": 0,
+     "snp": 0,
+     "microcode": 0
+    }
+   },
+   "minLaunchTcb": {
+    "Genoa": {
+     "bootloader": 10,
+     "tee": 0,
+     "snp": 23,
+     "microcode": 84
+    },
+    "Turin": {
+     "fmc": 0,
+     "bootloader": 0,
+     "tee": 0,
+     "snp": 0,
+     "microcode": 0
+    }
+   },
+   "minFirmware": {
+    "major": 1,
+    "minor": 58,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": [
+    "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   ],
+   "reportData": {
+    "kind": "exact",
+    "value": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   },
+   "idBlock": "forbid"
+  }
+ },
+ "all-fields": {
+  "policy": {
+   "measurement": [
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
+   ],
+   "products": [
+    "Milan",
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VLEK",
+   "allowMaskedChipId": true,
+   "chipIds": [
+    "33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333"
+   ],
+   "endorsementKeyFingerprints": [
+    "4444444444444444444444444444444444444444444444444444444444444444"
+   ],
+   "cspIds": [
+    "provider-1",
+    "provider-2"
+   ],
+   "requireCrl": true,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "any",
+    "smt": "required",
+    "singleSocket": "any",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "required",
+    "raplDisabled": "required",
+    "ciphertextHidingDram": "required",
+    "pageSwapDisabled": "any",
+    "minAbi": {
+     "major": 1,
+     "minor": 55
+    }
+   },
+   "platformInfo": {
+    "smtEnabled": "required",
+    "tsmeEnabled": "any",
+    "eccEnabled": "required",
+    "raplDisabled": "forbidden",
+    "ciphertextHidingEnabled": "any",
+    "aliasCheckComplete": "required",
+    "iommuWriteSafe": "any",
+    "tioEnabled": "forbidden",
+    "allowUnknownBits": true
+   },
+   "vmpl": 2,
+   "minReportVersion": 5,
+   "minGuestSvn": 4294967295,
+   "minTcb": {
+    "Genoa": {
+     "bootloader": 10,
+     "tee": 0,
+     "snp": 23,
+     "microcode": 84
+    },
+    "Turin": {
+     "fmc": 1,
+     "bootloader": 2,
+     "tee": 3,
+     "snp": 4,
+     "microcode": 5
+    }
+   },
+   "minLaunchTcb": {
+    "Genoa": {
+     "snp": 20
+    }
+   },
+   "minFirmware": {
+    "major": 1,
+    "minor": 55,
+    "build": 21
+   },
+   "allowProvisionalFirmware": true,
+   "minLaunchMitVector": "18446744073709551615",
+   "minCurrentMitVector": "3",
+   "reportData": {
+    "kind": "prefix",
+    "value": "abababababababababababababababab"
+   },
+   "hostData": "5555555555555555555555555555555555555555555555555555555555555555",
+   "familyId": "66666666666666666666666666666666",
+   "imageId": "77777777777777777777777777777777",
+   "reportId": "8888888888888888888888888888888888888888888888888888888888888888",
+   "idBlock": {
+    "idKeyDigest": "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+    "authorKeyDigest": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   }
+  },
+  "resolved": {
+   "products": [
+    "Milan",
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VLEK",
+   "allowMaskedChipId": true,
+   "chipIds": [
+    "33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333"
+   ],
+   "endorsementKeyFingerprints": [
+    "4444444444444444444444444444444444444444444444444444444444444444"
+   ],
+   "cspIds": [
+    "provider-1",
+    "provider-2"
+   ],
+   "requireCrl": true,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "any",
+    "smt": "required",
+    "singleSocket": "any",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "required",
+    "raplDisabled": "required",
+    "ciphertextHidingDram": "required",
+    "pageSwapDisabled": "any",
+    "minAbi": {
+     "major": 1,
+     "minor": 55
+    }
+   },
+   "platformInfo": {
+    "allowUnknownBits": true,
+    "smtEnabled": "required",
+    "tsmeEnabled": "any",
+    "eccEnabled": "required",
+    "raplDisabled": "forbidden",
+    "ciphertextHidingEnabled": "any",
+    "aliasCheckComplete": "required",
+    "iommuWriteSafe": "any",
+    "tioEnabled": "forbidden"
+   },
+   "vmpl": 2,
+   "minReportVersion": 5,
+   "minGuestSvn": 4294967295,
+   "minTcb": {
+    "Genoa": {
+     "bootloader": 10,
+     "tee": 0,
+     "snp": 23,
+     "microcode": 84
+    },
+    "Turin": {
+     "fmc": 1,
+     "bootloader": 2,
+     "tee": 3,
+     "snp": 4,
+     "microcode": 5
+    }
+   },
+   "minLaunchTcb": {
+    "Genoa": {
+     "snp": 20
+    }
+   },
+   "minFirmware": {
+    "major": 1,
+    "minor": 55,
+    "build": 21
+   },
+   "allowProvisionalFirmware": true,
+   "minLaunchMitVector": "18446744073709551615",
+   "minCurrentMitVector": "3",
+   "measurement": [
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
+   ],
+   "reportData": {
+    "kind": "prefix",
+    "value": "abababababababababababababababab"
+   },
+   "hostData": "5555555555555555555555555555555555555555555555555555555555555555",
+   "familyId": "66666666666666666666666666666666",
+   "imageId": "77777777777777777777777777777777",
+   "reportId": "8888888888888888888888888888888888888888888888888888888888888888",
+   "idBlock": {
+    "idKeyDigest": "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+    "authorKeyDigest": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   }
+  }
+ },
+ "comments-ignored": {
+  "policy": {
+   "$comment": "top",
+   "measurement": "any",
+   "vmpl": "any",
+   "guestPolicy": {
+    "$comment": "inner",
+    "smt": "forbidden"
+   },
+   "minTcb": {
+    "$comment": "x",
+    "Genoa": {
+     "$comment": "y",
+     "snp": 1
+    }
+   }
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "smt": "forbidden",
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": "any",
+   "minReportVersion": 2,
+   "minGuestSvn": 0,
+   "minTcb": {
+    "Genoa": {
+     "snp": 1
+    }
+   },
+   "minLaunchTcb": {
+    "Genoa": {
+     "snp": 1
+    }
+   },
+   "minFirmware": {
+    "major": 0,
+    "minor": 0,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   },
+   "idBlock": "forbid"
+  }
+ },
+ "id-block-any": {
+  "policy": {
+   "measurement": "any",
+   "idBlock": "any"
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": 0,
+   "minReportVersion": 2,
+   "minGuestSvn": 0,
+   "minTcb": {},
+   "minLaunchTcb": {},
+   "minFirmware": {
+    "major": 0,
+    "minor": 0,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   },
+   "idBlock": "any"
+  }
+ },
+ "id-block-without-author": {
+  "policy": {
+   "measurement": "any",
+   "idBlock": {
+    "idKeyDigest": "0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a"
+   }
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": 0,
+   "minReportVersion": 2,
+   "minGuestSvn": 0,
+   "minTcb": {},
+   "minLaunchTcb": {},
+   "minFirmware": {
+    "major": 0,
+    "minor": 0,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   },
+   "idBlock": {
+    "idKeyDigest": "0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a"
+   }
+  }
+ },
+ "report-data-exact": {
+  "policy": {
+   "measurement": "any",
+   "reportData": {
+    "kind": "exact",
+    "value": "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"
+   }
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": 0,
+   "minReportVersion": 2,
+   "minGuestSvn": 0,
+   "minTcb": {},
+   "minLaunchTcb": {},
+   "minFirmware": {
+    "major": 0,
+    "minor": 0,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": "any",
+   "reportData": {
+    "kind": "exact",
+    "value": "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"
+   },
+   "idBlock": "forbid"
+  }
+ },
+ "report-data-any": {
+  "policy": {
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   }
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": 0,
+   "minReportVersion": 2,
+   "minGuestSvn": 0,
+   "minTcb": {},
+   "minLaunchTcb": {},
+   "minFirmware": {
+    "major": 0,
+    "minor": 0,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   },
+   "idBlock": "forbid"
+  }
+ },
+ "min-firmware-partial": {
+  "policy": {
+   "measurement": "any",
+   "minFirmware": {
+    "minor": 58
+   }
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": 0,
+   "minReportVersion": 2,
+   "minGuestSvn": 0,
+   "minTcb": {},
+   "minLaunchTcb": {},
+   "minFirmware": {
+    "major": 0,
+    "minor": 58,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   },
+   "idBlock": "forbid"
+  }
+ },
+ "launch-floor-defaults-to-min-tcb": {
+  "policy": {
+   "measurement": "any",
+   "minTcb": {
+    "Genoa": {
+     "snp": 23
+    }
+   }
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": 0,
+   "minReportVersion": 2,
+   "minGuestSvn": 0,
+   "minTcb": {
+    "Genoa": {
+     "snp": 23
+    }
+   },
+   "minLaunchTcb": {
+    "Genoa": {
+     "snp": 23
+    }
+   },
+   "minFirmware": {
+    "major": 0,
+    "minor": 0,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   },
+   "idBlock": "forbid"
+  }
+ },
+ "not-json": {
+  "policy": "not json {",
+  "error": "policy is not valid JSON"
+ },
+ "not-object": {
+  "policy": [
+   1,
+   2
+  ],
+  "error": "policy must be an object"
+ },
+ "unknown-field": {
+  "policy": {
+   "measurement": "any",
+   "foo": 1
+  },
+  "error": "policy has unknown fields"
+ },
+ "measurement-missing": {
+  "policy": {},
+  "error": "policy.measurement is required: an allowlist or the explicit string \"any\""
+ },
+ "measurement-empty": {
+  "policy": {
+   "measurement": []
+  },
+  "error": "policy.measurement must be a nonempty array or \"any\""
+ },
+ "measurement-not-hex": {
+  "policy": {
+   "measurement": [
+    "zz"
+   ]
+  },
+  "error": "policy.measurement[] must be a hex string"
+ },
+ "measurement-not-string": {
+  "policy": {
+   "measurement": [
+    1
+   ]
+  },
+  "error": "policy.measurement[] must be a hex string"
+ },
+ "measurement-wrong-length": {
+  "policy": {
+   "measurement": [
+    "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   ]
+  },
+  "error": "policy.measurement[] must be 48 bytes"
+ },
+ "measurement-other-string": {
+  "policy": {
+   "measurement": "all"
+  },
+  "error": "policy.measurement must be a nonempty array or \"any\""
+ },
+ "products-unknown": {
+  "policy": {
+   "measurement": "any",
+   "products": [
+    "Rome"
+   ]
+  },
+  "error": "policy.products must be a nonempty Product list"
+ },
+ "products-empty": {
+  "policy": {
+   "measurement": "any",
+   "products": []
+  },
+  "error": "policy.products must be a nonempty Product list"
+ },
+ "signing-key-invalid": {
+  "policy": {
+   "measurement": "any",
+   "signingKey": "vcek"
+  },
+  "error": "policy.signingKey is invalid"
+ },
+ "require-crl-not-boolean": {
+  "policy": {
+   "measurement": "any",
+   "requireCrl": "yes"
+  },
+  "error": "policy.requireCrl must be boolean"
+ },
+ "chip-ids-not-array": {
+  "policy": {
+   "measurement": "any",
+   "chipIds": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "error": "policy.chipIds must be an array"
+ },
+ "chip-id-wrong-length": {
+  "policy": {
+   "measurement": "any",
+   "chipIds": [
+    "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   ]
+  },
+  "error": "policy.chipIds[] must be 64 bytes"
+ },
+ "fingerprint-not-hex": {
+  "policy": {
+   "measurement": "any",
+   "endorsementKeyFingerprints": [
+    "xyz"
+   ]
+  },
+  "error": "policy.endorsementKeyFingerprints[] must be a hex string"
+ },
+ "csp-ids-empty": {
+  "policy": {
+   "measurement": "any",
+   "cspIds": []
+  },
+  "error": "policy.cspIds must be nonempty strings"
+ },
+ "csp-id-empty-string": {
+  "policy": {
+   "measurement": "any",
+   "cspIds": [
+    ""
+   ]
+  },
+  "error": "policy.cspIds must be nonempty strings"
+ },
+ "guest-policy-not-object": {
+  "policy": {
+   "measurement": "any",
+   "guestPolicy": "strict"
+  },
+  "error": "policy.guestPolicy must be an object"
+ },
+ "guest-policy-unknown-field": {
+  "policy": {
+   "measurement": "any",
+   "guestPolicy": {
+    "dbg": "forbidden"
+   }
+  },
+  "error": "policy.guestPolicy has unknown fields"
+ },
+ "guest-policy-bit-invalid": {
+  "policy": {
+   "measurement": "any",
+   "guestPolicy": {
+    "debug": "maybe"
+   }
+  },
+  "error": "policy.guestPolicy.debug is not a Bit"
+ },
+ "min-abi-partial": {
+  "policy": {
+   "measurement": "any",
+   "guestPolicy": {
+    "minAbi": {
+     "major": 1
+    }
+   }
+  },
+  "error": "policy.guestPolicy.minAbi requires major and minor"
+ },
+ "min-abi-range": {
+  "policy": {
+   "measurement": "any",
+   "guestPolicy": {
+    "minAbi": {
+     "major": 256,
+     "minor": 0
+    }
+   }
+  },
+  "error": "policy.guestPolicy.minAbi.major must be an integer in 0..255"
+ },
+ "platform-info-bit-invalid": {
+  "policy": {
+   "measurement": "any",
+   "platformInfo": {
+    "tsmeEnabled": true
+   }
+  },
+  "error": "policy.platformInfo.tsmeEnabled is not a Bit"
+ },
+ "allow-unknown-bits-not-boolean": {
+  "policy": {
+   "measurement": "any",
+   "platformInfo": {
+    "allowUnknownBits": 1
+   }
+  },
+  "error": "policy.platformInfo.allowUnknownBits must be boolean"
+ },
+ "vmpl-string": {
+  "policy": {
+   "measurement": "any",
+   "vmpl": "all"
+  },
+  "error": "policy.vmpl must be 0..3 or any"
+ },
+ "vmpl-range": {
+  "policy": {
+   "measurement": "any",
+   "vmpl": 4
+  },
+  "error": "policy.vmpl must be 0..3"
+ },
+ "min-report-version-range": {
+  "policy": {
+   "measurement": "any",
+   "minReportVersion": 6
+  },
+  "error": "policy.minReportVersion must be 2..5"
+ },
+ "min-guest-svn-negative": {
+  "policy": {
+   "measurement": "any",
+   "minGuestSvn": -1
+  },
+  "error": "policy.minGuestSvn must be an integer in 0..4294967295"
+ },
+ "min-tcb-unknown-product": {
+  "policy": {
+   "measurement": "any",
+   "minTcb": {
+    "Rome": {
+     "snp": 1
+    }
+   }
+  },
+  "error": "policy.minTcb has unknown fields"
+ },
+ "min-tcb-unknown-component": {
+  "policy": {
+   "measurement": "any",
+   "minTcb": {
+    "Genoa": {
+     "spl": 1
+    }
+   }
+  },
+  "error": "policy.minTcb.Genoa has unknown fields"
+ },
+ "min-tcb-range": {
+  "policy": {
+   "measurement": "any",
+   "minTcb": {
+    "Genoa": {
+     "snp": 256
+    }
+   }
+  },
+  "error": "policy.minTcb.Genoa.snp must be an integer in 0..255"
+ },
+ "min-launch-tcb-not-object": {
+  "policy": {
+   "measurement": "any",
+   "minLaunchTcb": 3
+  },
+  "error": "policy.minLaunchTcb must be an object"
+ },
+ "min-firmware-range": {
+  "policy": {
+   "measurement": "any",
+   "minFirmware": {
+    "build": -1
+   }
+  },
+  "error": "policy.minFirmware.build must be an integer in 0..255"
+ },
+ "mit-vector-number": {
+  "policy": {
+   "measurement": "any",
+   "minLaunchMitVector": 3
+  },
+  "error": "policy.minLaunchMitVector must be uint64"
+ },
+ "mit-vector-overflow": {
+  "policy": {
+   "measurement": "any",
+   "minCurrentMitVector": "18446744073709551616"
+  },
+  "error": "policy.minCurrentMitVector must be uint64"
+ },
+ "report-data-kind-invalid": {
+  "policy": {
+   "measurement": "any",
+   "reportData": {
+    "kind": "excat",
+    "value": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   }
+  },
+  "error": "policy.reportData.kind is invalid"
+ },
+ "report-data-exact-length": {
+  "policy": {
+   "measurement": "any",
+   "reportData": {
+    "kind": "exact",
+    "value": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   }
+  },
+  "error": "policy.reportData.value must be 64 bytes"
+ },
+ "report-data-prefix-empty": {
+  "policy": {
+   "measurement": "any",
+   "reportData": {
+    "kind": "prefix",
+    "value": ""
+   }
+  },
+  "error": "policy.reportData.value must be 1..64 bytes"
+ },
+ "report-data-any-with-value": {
+  "policy": {
+   "measurement": "any",
+   "reportData": {
+    "kind": "any",
+    "value": "00"
+   }
+  },
+  "error": "policy.reportData has unknown fields"
+ },
+ "host-data-length": {
+  "policy": {
+   "measurement": "any",
+   "hostData": "00000000000000000000000000000000000000000000000000000000000000"
+  },
+  "error": "policy.hostData must be 32 bytes"
+ },
+ "family-id-not-hex": {
+  "policy": {
+   "measurement": "any",
+   "familyId": "nothex"
+  },
+  "error": "policy.familyId must be a hex string"
+ },
+ "id-block-invalid": {
+  "policy": {
+   "measurement": "any",
+   "idBlock": "maybe"
+  },
+  "error": "policy.idBlock is invalid"
+ },
+ "id-block-missing-digest": {
+  "policy": {
+   "measurement": "any",
+   "idBlock": {
+    "authorKeyDigest": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   }
+  },
+  "error": "policy.idBlock.idKeyDigest is required"
+ },
+ "id-block-digest-length": {
+  "policy": {
+   "measurement": "any",
+   "idBlock": {
+    "idKeyDigest": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+   }
+  },
+  "error": "policy.idBlock.idKeyDigest must be 48 bytes"
+ },
+ "measurement-null": {
+  "policy": {
+   "measurement": null
+  },
+  "error": "policy.measurement must be a nonempty array or \"any\""
+ },
+ "vmpl-null": {
+  "policy": {
+   "measurement": "any",
+   "vmpl": null
+  },
+  "error": "policy.vmpl must be 0..3 or any"
+ },
+ "vmpl-float": {
+  "policy": {
+   "measurement": "any",
+   "vmpl": 1.5
+  },
+  "error": "policy.vmpl must be 0..3"
+ },
+ "vmpl-negative": {
+  "policy": {
+   "measurement": "any",
+   "vmpl": -1
+  },
+  "error": "policy.vmpl must be 0..3"
+ },
+ "vmpl-boolean": {
+  "policy": {
+   "measurement": "any",
+   "vmpl": true
+  },
+  "error": "policy.vmpl must be 0..3 or any"
+ },
+ "products-string": {
+  "policy": {
+   "measurement": "any",
+   "products": "Genoa"
+  },
+  "error": "policy.products must be a nonempty Product list"
+ },
+ "products-null": {
+  "policy": {
+   "measurement": "any",
+   "products": null
+  },
+  "error": "policy.products must be a nonempty Product list"
+ },
+ "products-not-strings": {
+  "policy": {
+   "measurement": "any",
+   "products": [
+    1
+   ]
+  },
+  "error": "policy.products must be a nonempty Product list"
+ },
+ "signing-key-null": {
+  "policy": {
+   "measurement": "any",
+   "signingKey": null
+  },
+  "error": "policy.signingKey is invalid"
+ },
+ "bool-number": {
+  "policy": {
+   "measurement": "any",
+   "allowMaskedChipId": 1
+  },
+  "error": "policy.allowMaskedChipId must be boolean"
+ },
+ "chip-ids-null": {
+  "policy": {
+   "measurement": "any",
+   "chipIds": null
+  },
+  "error": "policy.chipIds must be an array"
+ },
+ "chip-ids-not-strings": {
+  "policy": {
+   "measurement": "any",
+   "chipIds": [
+    1
+   ]
+  },
+  "error": "policy.chipIds[] must be a hex string"
+ },
+ "csp-ids-string": {
+  "policy": {
+   "measurement": "any",
+   "cspIds": "provider-1"
+  },
+  "error": "policy.cspIds must be nonempty strings"
+ },
+ "csp-ids-not-strings": {
+  "policy": {
+   "measurement": "any",
+   "cspIds": [
+    "provider-1",
+    1
+   ]
+  },
+  "error": "policy.cspIds must be nonempty strings"
+ },
+ "guest-policy-array": {
+  "policy": {
+   "measurement": "any",
+   "guestPolicy": []
+  },
+  "error": "policy.guestPolicy must be an object"
+ },
+ "guest-policy-null": {
+  "policy": {
+   "measurement": "any",
+   "guestPolicy": null
+  },
+  "error": "policy.guestPolicy must be an object"
+ },
+ "min-abi-null": {
+  "policy": {
+   "measurement": "any",
+   "guestPolicy": {
+    "minAbi": null
+   }
+  },
+  "error": "policy.guestPolicy.minAbi must be an object"
+ },
+ "min-abi-array": {
+  "policy": {
+   "measurement": "any",
+   "guestPolicy": {
+    "minAbi": []
+   }
+  },
+  "error": "policy.guestPolicy.minAbi must be an object"
+ },
+ "min-firmware-array": {
+  "policy": {
+   "measurement": "any",
+   "minFirmware": []
+  },
+  "error": "policy.minFirmware must be an object"
+ },
+ "report-data-array": {
+  "policy": {
+   "measurement": "any",
+   "reportData": []
+  },
+  "error": "policy.reportData must be an object"
+ },
+ "min-abi-string-component": {
+  "policy": {
+   "measurement": "any",
+   "guestPolicy": {
+    "minAbi": {
+     "major": "1",
+     "minor": 0
+    }
+   }
+  },
+  "error": "policy.guestPolicy.minAbi.major must be an integer in 0..255"
+ },
+ "platform-info-array": {
+  "policy": {
+   "measurement": "any",
+   "platformInfo": []
+  },
+  "error": "policy.platformInfo must be an object"
+ },
+ "min-tcb-array": {
+  "policy": {
+   "measurement": "any",
+   "minTcb": []
+  },
+  "error": "policy.minTcb must be an object"
+ },
+ "min-tcb-product-null": {
+  "policy": {
+   "measurement": "any",
+   "minTcb": {
+    "Genoa": null
+   }
+  },
+  "error": "policy.minTcb.Genoa must be an object"
+ },
+ "min-tcb-component-string": {
+  "policy": {
+   "measurement": "any",
+   "minTcb": {
+    "Genoa": {
+     "snp": "1"
+    }
+   }
+  },
+  "error": "policy.minTcb.Genoa.snp must be an integer in 0..255"
+ },
+ "min-tcb-component-float": {
+  "policy": {
+   "measurement": "any",
+   "minTcb": {
+    "Genoa": {
+     "snp": 1.5
+    }
+   }
+  },
+  "error": "policy.minTcb.Genoa.snp must be an integer in 0..255"
+ },
+ "min-guest-svn-float": {
+  "policy": {
+   "measurement": "any",
+   "minGuestSvn": 1.5
+  },
+  "error": "policy.minGuestSvn must be an integer in 0..4294967295"
+ },
+ "min-guest-svn-huge": {
+  "policy": {
+   "measurement": "any",
+   "minGuestSvn": 1e+100
+  },
+  "error": "policy.minGuestSvn must be an integer in 0..4294967295"
+ },
+ "min-firmware-null": {
+  "policy": {
+   "measurement": "any",
+   "minFirmware": null
+  },
+  "error": "policy.minFirmware must be an object"
+ },
+ "min-firmware-component-string": {
+  "policy": {
+   "measurement": "any",
+   "minFirmware": {
+    "major": "1"
+   }
+  },
+  "error": "policy.minFirmware.major must be an integer in 0..255"
+ },
+ "mit-vector-null": {
+  "policy": {
+   "measurement": "any",
+   "minLaunchMitVector": null
+  },
+  "error": "policy.minLaunchMitVector must be uint64"
+ },
+ "mit-vector-empty": {
+  "policy": {
+   "measurement": "any",
+   "minLaunchMitVector": ""
+  },
+  "error": "policy.minLaunchMitVector must be uint64"
+ },
+ "mit-vector-signed": {
+  "policy": {
+   "measurement": "any",
+   "minLaunchMitVector": "+1"
+  },
+  "error": "policy.minLaunchMitVector must be uint64"
+ },
+ "mit-vector-hex": {
+  "policy": {
+   "measurement": "any",
+   "minLaunchMitVector": "0x10"
+  },
+  "error": "policy.minLaunchMitVector must be uint64"
+ },
+ "mit-vector-zero": {
+  "policy": {
+   "measurement": "any",
+   "minLaunchMitVector": "0",
+   "minCurrentMitVector": "0"
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": 0,
+   "minReportVersion": 2,
+   "minGuestSvn": 0,
+   "minTcb": {},
+   "minLaunchTcb": {},
+   "minFirmware": {
+    "major": 0,
+    "minor": 0,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "minLaunchMitVector": "0",
+   "minCurrentMitVector": "0",
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   },
+   "idBlock": "forbid"
+  }
+ },
+ "report-data-string": {
+  "policy": {
+   "measurement": "any",
+   "reportData": "any"
+  },
+  "error": "policy.reportData must be an object"
+ },
+ "report-data-null-kind": {
+  "policy": {
+   "measurement": "any",
+   "reportData": {
+    "kind": null
+   }
+  },
+  "error": "policy.reportData.kind is invalid"
+ },
+ "report-data-value-null": {
+  "policy": {
+   "measurement": "any",
+   "reportData": {
+    "kind": "exact",
+    "value": null
+   }
+  },
+  "error": "policy.reportData.value must be a hex string"
+ },
+ "report-data-missing-value": {
+  "policy": {
+   "measurement": "any",
+   "reportData": {
+    "kind": "prefix"
+   }
+  },
+  "error": "policy.reportData.value must be 1..64 bytes"
+ },
+ "host-data-null": {
+  "policy": {
+   "measurement": "any",
+   "hostData": null
+  },
+  "error": "policy.hostData must be a hex string"
+ },
+ "host-data-empty": {
+  "policy": {
+   "measurement": "any",
+   "hostData": ""
+  },
+  "error": "policy.hostData must be 32 bytes"
+ },
+ "host-data-odd-length": {
+  "policy": {
+   "measurement": "any",
+   "hostData": "0"
+  },
+  "error": "policy.hostData must be a hex string"
+ },
+ "host-data-uppercase": {
+  "policy": {
+   "measurement": "any",
+   "hostData": "ABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABAB"
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": 0,
+   "minReportVersion": 2,
+   "minGuestSvn": 0,
+   "minTcb": {},
+   "minLaunchTcb": {},
+   "minFirmware": {
+    "major": 0,
+    "minor": 0,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   },
+   "hostData": "abababababababababababababababababababababababababababababababab",
+   "idBlock": "forbid"
+  }
+ },
+ "id-block-array": {
+  "policy": {
+   "measurement": "any",
+   "idBlock": []
+  },
+  "error": "policy.idBlock is invalid"
+ },
+ "id-block-null": {
+  "policy": {
+   "measurement": "any",
+   "idBlock": null
+  },
+  "error": "policy.idBlock is invalid"
+ },
+ "id-block-digest-null": {
+  "policy": {
+   "measurement": "any",
+   "idBlock": {
+    "idKeyDigest": null
+   }
+  },
+  "error": "policy.idBlock.idKeyDigest must be a hex string"
+ },
+ "id-block-author-null": {
+  "policy": {
+   "measurement": "any",
+   "idBlock": {
+    "idKeyDigest": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "authorKeyDigest": null
+   }
+  },
+  "error": "policy.idBlock.authorKeyDigest must be a hex string"
+ },
+ "comment-not-string": {
+  "policy": {
+   "$comment": 5,
+   "measurement": "any"
+  },
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": 0,
+   "minReportVersion": 2,
+   "minGuestSvn": 0,
+   "minTcb": {},
+   "minLaunchTcb": {},
+   "minFirmware": {
+    "major": 0,
+    "minor": 0,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   },
+   "idBlock": "forbid"
+  }
+ },
+ "text-trailing-garbage": {
+  "policy": "{\"measurement\":\"any\"} x",
+  "error": "policy is not valid JSON"
+ },
+ "text-array": {
+  "policy": "[]",
+  "error": "policy must be an object"
+ },
+ "text-empty": {
+  "policy": "",
+  "error": "policy is not valid JSON"
+ },
+ "text-number-forms": {
+  "policy": "{\"measurement\":\"any\",\"vmpl\":1e0,\"minGuestSvn\":5.0,\"minReportVersion\":3.0,\"minTcb\":{\"Genoa\":{\"snp\":2.0}},\"guestPolicy\":{\"minAbi\":{\"major\":1.0,\"minor\":0}}}",
+  "resolved": {
+   "products": [
+    "Genoa",
+    "Turin"
+   ],
+   "signingKey": "VCEK",
+   "allowMaskedChipId": false,
+   "requireCrl": false,
+   "guestPolicy": {
+    "minAbi": {
+     "major": 1,
+     "minor": 0
+    },
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "memAes256Xts": "any"
+   },
+   "platformInfo": {
+    "allowUnknownBits": false
+   },
+   "vmpl": 1,
+   "minReportVersion": 3,
+   "minGuestSvn": 5,
+   "minTcb": {
+    "Genoa": {
+     "snp": 2
+    }
+   },
+   "minLaunchTcb": {
+    "Genoa": {
+     "snp": 2
+    }
+   },
+   "minFirmware": {
+    "major": 0,
+    "minor": 0,
+    "build": 0
+   },
+   "allowProvisionalFirmware": false,
+   "measurement": "any",
+   "reportData": {
+    "kind": "any"
+   },
+   "idBlock": "forbid"
+  }
+ }
+}

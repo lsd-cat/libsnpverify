@@ -20,6 +20,7 @@ export {
   type Report, type Product, type TcbVersion, type GuestPolicy, type PlatformInfo, type SignerInfo, type SigningKey, type FirmwareVersion, type TcbLayout,
 } from './report.ts';
 export { resolveAppraisalPolicy, checkAppraisalPolicy, type AppraisalPolicy, type ResolvedAppraisalPolicy, type AppraisalContext, type Bit, type ReportDataPin, type IdBlockPin } from './policy.ts';
+export { appraisalPolicyFromJson, appraisalPolicyToJson } from './policy-json.ts';
 export { baseVcekAppraisalPolicy, baseVlekAppraisalPolicy, type BaseAppraisalPolicyConfig } from './base-policies.ts';
 export { PRODUCTS, productFromName, productFromCpuid, type ProductInfo } from './products.ts';
 export { verifyChain, type ChainInput, type EndorsementKey, type Chain, type CrlInfo } from './chain.ts';

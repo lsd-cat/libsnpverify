@@ -40,77 +40,80 @@ that state.
 
 The appraisal policy below sets every field in the table. It accepts Genoa and Turin. It excludes Milan for
 two reasons: the root seed extraction result, and the absence of ciphertext hiding and RAPL
-control on Milan. Fields whose value depends on the deployment are marked in the code.
+control on Milan. Fields whose value depends on the deployment are marked in `$comment` notes, which every port ignores.
 
 The Genoa TCB floors are the values carried by the production Genoa report in
 `vectors/attestation-sev/200` (firmware issued January 2026). They are values observed on
 patched hardware. They are not a statement that lower values are vulnerable. A deployment raises
 them when the AMD bulletin for its firmware requires it. The Turin floors are placeholders; the
 deployment takes them from the AMD bulletin, because this repository has no Turin report to
-observe.
+observe. The measurement and report-data values are zero placeholders so that the document is a
+valid policy; a deployment replaces them.
 
-```ts
-const policy: AppraisalPolicy = {
-  // deployment values
-  measurement: [/* approved launch digests */],
-  reportData: { kind: 'exact', value: sessionBinding },   // SHA-512 of nonce and channel key, per session
-  chipIds: [/* CHIP_IDs of the machines you operate, or omit for cloud fleets */],
+```json
+{
+  "$comment": "snpverify appraisal policy, 2026-10-04. Replace measurement and reportData with deployment values; add chipIds for machines you operate.",
+  "measurement": ["000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"],
+  "reportData": { "$comment": "SHA-512 of nonce and channel key, per session", "kind": "exact",
+    "value": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" },
 
-  products: ['Genoa', 'Turin'],
-  signingKey: 'VCEK',
-  allowMaskedChipId: false,
-  requireCrl: true,
-  minReportVersion: 3,
-  vmpl: 0,
-  idBlock: 'forbid',
+  "products": ["Genoa", "Turin"],
+  "signingKey": "VCEK",
+  "allowMaskedChipId": false,
+  "requireCrl": true,
+  "minReportVersion": 3,
+  "vmpl": 0,
+  "idBlock": "forbid",
 
-  guestPolicy: {
-    debug: 'forbidden',
-    migrateMa: 'forbidden',
-    cxlAllowed: 'forbidden',
-    smt: 'forbidden',                      // StackWarp, CounterSEVeillance; relax to 'any' if the host cannot disable SMT
-    ciphertextHidingDram: 'required',      // CipherLeaks, Heracles
-    pageSwapDisabled: 'required',          // Heracles; needs ABI 1.58 firmware
-    raplDisabled: 'required',              // PwrLeak
-    memAes256Xts: 'any',
-    singleSocket: 'any',
+  "guestPolicy": {
+    "$comment": "smt: StackWarp, CounterSEVeillance; relax to any if the host cannot disable SMT. ciphertextHidingDram: CipherLeaks, Heracles. pageSwapDisabled: Heracles; needs ABI 1.58 firmware. raplDisabled: PwrLeak.",
+    "debug": "forbidden",
+    "migrateMa": "forbidden",
+    "cxlAllowed": "forbidden",
+    "smt": "forbidden",
+    "ciphertextHidingDram": "required",
+    "pageSwapDisabled": "required",
+    "raplDisabled": "required",
+    "memAes256Xts": "any",
+    "singleSocket": "any"
   },
-  platformInfo: {
-    smtEnabled: 'forbidden',               // with guestPolicy.smt
-    aliasCheckComplete: 'required',        // BadRAM
-    iommuWriteSafe: 'required',            // SB-3016; needs the host OS update as well
-    ciphertextHidingEnabled: 'required',
-    raplDisabled: 'required',
-    tsmeEnabled: 'any',
-    eccEnabled: 'any',
-    tioEnabled: 'any',
-    allowUnknownBits: false,
+  "platformInfo": {
+    "$comment": "smtEnabled: with guestPolicy.smt. aliasCheckComplete: BadRAM. iommuWriteSafe: SB-3016; needs the host OS update as well.",
+    "smtEnabled": "forbidden",
+    "aliasCheckComplete": "required",
+    "iommuWriteSafe": "required",
+    "ciphertextHidingEnabled": "required",
+    "raplDisabled": "required",
+    "tsmeEnabled": "any",
+    "eccEnabled": "any",
+    "tioEnabled": "any",
+    "allowUnknownBits": false
   },
 
-  minTcb: {
-    Genoa: { bootloader: 10, tee: 0, snp: 23, microcode: 84 },   // observed 2026-01; raise per bulletin
-    Turin: { fmc: 0, bootloader: 0, tee: 0, snp: 0, microcode: 0 }, // fill from the Turin bulletin
+  "minTcb": {
+    "$comment": "Genoa: observed 2026-01; raise per bulletin. Turin: placeholders, fill from the Turin bulletin.",
+    "Genoa": { "bootloader": 10, "tee": 0, "snp": 23, "microcode": 84 },
+    "Turin": { "fmc": 0, "bootloader": 0, "tee": 0, "snp": 0, "microcode": 0 }
   },
-  minFirmware: { major: 1, minor: 58, build: 0 },                // ABI 1.58 for the page-swap bit
-  allowProvisionalFirmware: false,
-};
+  "minFirmware": { "$comment": "ABI 1.58 for the page-swap bit", "major": 1, "minor": 58, "build": 0 },
+  "allowProvisionalFirmware": false
+}
 ```
 
+The same document loads in every port. Each call returns a `POLICY_INVALID` violation for a
+malformed document; the vector `vectors/policy.json` pins the accepted documents and the messages.
+
+```ts
+const policy = appraisalPolicyFromJson(text);           // TypeScript: AppraisalPolicy | Violation
+```
 ```kotlin
-val policy = AppraisalPolicy(
-    measurement = MeasurementPin.Allowlist(approvedDigests),
-    reportData = ReportDataPin.Exact(sessionBinding),
-    chipIds = operatedChipIds,
-    products = listOf(Product.Genoa, Product.Turin),
-    signingKey = SigningKeyPolicy.VCEK, allowMaskedChipId = false, requireCrl = true, minReportVersion = 3, vmpl = 0, idBlock = IdBlockPin.Forbid,
-    guestPolicy = GuestPolicyRules(debug = Bit.FORBIDDEN, migrateMa = Bit.FORBIDDEN, cxlAllowed = Bit.FORBIDDEN, smt = Bit.FORBIDDEN,
-        ciphertextHidingDram = Bit.REQUIRED, pageSwapDisabled = Bit.REQUIRED, raplDisabled = Bit.REQUIRED),
-    platformInfo = PlatformInfoRules(smtEnabled = Bit.FORBIDDEN, aliasCheckComplete = Bit.REQUIRED, iommuWriteSafe = Bit.REQUIRED,
-        ciphertextHidingEnabled = Bit.REQUIRED, raplDisabled = Bit.REQUIRED, allowUnknownBits = false),
-    minTcb = mapOf(Product.Genoa to TcbFloor(10, 0, 23, 84), Product.Turin to TcbFloor(0, 0, 0, 0, fmc = 0)),
-    minFirmware = FirmwareVersion(1, 58, 0),
-    allowProvisionalFirmware = false,
-)
+val policy = appraisalPolicyFromJson(text)              // Kotlin: Result<AppraisalPolicy>, org.json
+```
+```go
+policy, err := snpverify.AppraisalPolicyFromJSON(text)  // Go: error is a *Violation
+```
+```rust
+let policy = appraisal_policy_from_json(text)?;         // Rust: Result<AppraisalPolicy>
 ```
 
 This appraisal policy does not address dynamic memory interposers, cache and page-fault side channels,

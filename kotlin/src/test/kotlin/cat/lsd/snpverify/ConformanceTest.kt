@@ -2,6 +2,8 @@ package cat.lsd.snpverify
 
 // Runs the Tinfoil conformance vectors through SnpVerifier. Mirrors ts/test/conformance.test.ts exactly.
 import com.google.gson.JsonObject
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import java.io.File
@@ -10,15 +12,25 @@ import kotlin.test.assertTrue
 
 class ConformanceTest {
     private val crypto = JcaCryptoProvider()
-    private val baseline = AppraisalPolicy(MeasurementPin.Any, vmplAny = true, products = listOf(Product.Milan, Product.Genoa, Product.Turin))
-    private val hardened = baseline.copy(
-        allowMaskedChipId = true,
-        minTcb = mapOf(Product.Genoa to TcbFloor(snp = 14)),
-        minFirmware = FirmwareVersion(1, 55, 21),
-        guestPolicy = GuestPolicyRules(debug = Bit.FORBIDDEN, migrateMa = Bit.FORBIDDEN, cxlAllowed = Bit.FORBIDDEN, memAes256Xts = Bit.FORBIDDEN),
-        platformInfo = PlatformInfoRules(tsmeEnabled = Bit.REQUIRED),
-    )
-    private val hardenedPlatform = PlatformInfoRules(tsmeEnabled = Bit.REQUIRED, eccEnabled = Bit.REQUIRED, raplDisabled = Bit.REQUIRED, ciphertextHidingEnabled = Bit.REQUIRED, aliasCheckComplete = Bit.REQUIRED, tioEnabled = Bit.REQUIRED)
+
+    // Policies are built in the JSON form (SPEC §5) so that every port runs the vectors through its JSON loader.
+    private fun baseline() = JSONObject().put("measurement", "any").put("vmpl", "any").put("products", JSONArray(listOf("Milan", "Genoa", "Turin")))
+
+    // Mirrors the "hardened" expectations encoded by the synthetic fixtures (SPEC §3.7.1 defaults + DECIDE-LATER probes).
+    private fun hardened() = baseline()
+        .put("allowMaskedChipId", true)
+        .put("minTcb", JSONObject().put("Genoa", JSONObject().put("snp", 14)))
+        .put("minFirmware", JSONObject(mapOf("major" to 1, "minor" to 55, "build" to 21)))
+        .put("guestPolicy", JSONObject(mapOf("debug" to "forbidden", "migrateMa" to "forbidden", "cxlAllowed" to "forbidden", "memAes256Xts" to "forbidden")))
+        .put("platformInfo", JSONObject(mapOf("tsmeEnabled" to "required")))
+
+    // The 27x probes encode the DECIDE-LATER hardened stance that the rest of the synthetic suite does not satisfy.
+    private fun hardenedPlatform() = JSONObject(mapOf("tsmeEnabled" to "required", "eccEnabled" to "required", "raplDisabled" to "required", "ciphertextHidingEnabled" to "required", "aliasCheckComplete" to "required", "tioEnabled" to "required"))
+
+    private fun policyOf(j: JSONObject): AppraisalPolicy = when (val r = appraisalPolicyFromJson(j)) {
+        is Result.Ok -> r.value
+        is Result.Err -> error("policy: ${r.error}")
+    }
 
     private fun tinfoilCode(r: AppraisalResult.Err): String {
         val v = r.violations[0]
@@ -66,21 +78,22 @@ class ConformanceTest {
             val report = Fixtures.gunzip(fromBase64(input["attestation_doc_b64"].asString))
             val synthetic = input.has("amd_root_ca_pem")
             val pol: JsonObject = input.getAsJsonObject("policy") ?: JsonObject()
-            fun hexOpt(k: String) = if (pol.has(k)) fromHex(pol[k].asString) else null
-            var policy = if (synthetic) hardened else baseline
-            if (Regex("^27[0-4]").containsMatchIn(dir.name)) policy = policy.copy(platformInfo = hardenedPlatform)
-            hexOpt("expected_measurement_hex")?.let { policy = policy.copy(measurement = MeasurementPin.Allowlist(listOf(it))) }
-            hexOpt("expected_report_data_hex")?.let { policy = policy.copy(reportData = ReportDataPin.Exact(it)) }
-            hexOpt("expected_host_data_hex")?.let { policy = policy.copy(hostData = it) }
-            val idk = hexOpt("expected_id_key_digest_hex");
+            fun hexOpt(k: String) = if (pol.has(k)) pol[k].asString else null
+            val j = if (synthetic) hardened() else baseline()
+            if (Regex("^27[0-4]").containsMatchIn(dir.name)) j.put("platformInfo", hardenedPlatform())
+            hexOpt("expected_measurement_hex")?.let { j.put("measurement", JSONArray(listOf(it))) }
+            hexOpt("expected_report_data_hex")?.let { j.put("reportData", JSONObject(mapOf("kind" to "exact", "value" to it))) }
+            hexOpt("expected_host_data_hex")?.let { j.put("hostData", it) }
+            val idk = hexOpt("expected_id_key_digest_hex")
             val ak = hexOpt("expected_author_key_digest_hex")
-            if (idk != null || ak != null) policy = policy.copy(idBlock = IdBlockPin.Pinned(idk ?: ByteArray(48), ak))
-            val floorKeys = listOf("min_tcb_bl_spl", "min_tcb_tee_spl", "min_tcb_snp_spl", "min_tcb_ucode_spl")
-            if (floorKeys.any { pol.has(it) }) {
-                fun i(k: String) = if (pol.has(k)) pol[k].asInt else null
-                val f = TcbFloor(bootloader = i("min_tcb_bl_spl"), tee = i("min_tcb_tee_spl"), snp = i("min_tcb_snp_spl"), microcode = i("min_tcb_ucode_spl"))
-                policy = policy.copy(minTcb = mapOf(Product.Milan to f, Product.Genoa to f, Product.Turin to f))
+            if (idk != null || ak != null) j.put("idBlock", JSONObject().put("idKeyDigest", idk ?: "00".repeat(48)).put("authorKeyDigest", ak))
+            val floorKeys = mapOf("min_tcb_bl_spl" to "bootloader", "min_tcb_tee_spl" to "tee", "min_tcb_snp_spl" to "snp", "min_tcb_ucode_spl" to "microcode")
+            if (floorKeys.keys.any { pol.has(it) }) {
+                val f = JSONObject()
+                for ((k, name) in floorKeys) if (pol.has(k)) f.put(name, pol[k].asInt)
+                j.put("minTcb", JSONObject().put("Milan", f).put("Genoa", f).put("Turin", f))
             }
+            val policy = policyOf(j)
             val ark = if (synthetic) pemToDer(input["amd_root_ca_pem"].asString)[0] else null
             val verifier = SnpVerifier(crypto, trustedArks = ark?.let { listOf(it) })
             val result = verifier.appraise(
@@ -129,7 +142,7 @@ class ConformanceTest {
                     evidence = fromBase64(doc.getAsJsonObject("cpu_evidence")["report_base64"].asString),
                     endorsements = Endorsements(vcek = fromBase64(vcekB64), ask = chain[0], ark = chain[1], crl = fromBase64(crlB64)),
                     now = System.currentTimeMillis() / 1000,
-                    policy = baseline.copy(requireCrl = true, minReportVersion = 3),
+                    policy = policyOf(baseline().put("requireCrl", true).put("minReportVersion", 3)),
                 )
             )
             // Older synthetic happy vector has a v3 CRL issuer without keyUsage.
