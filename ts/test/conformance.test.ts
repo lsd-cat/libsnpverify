@@ -5,14 +5,16 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
-import { SnpVerifier, fromBase64, fromHex, pemToDer, type AppraisalPolicy, type ErrorCode, type AppraisalResult } from '../src/index.ts';
+import { SnpVerifier, appraisalPolicyFromJson, fromBase64, pemToDer, type AppraisalPolicy, type ErrorCode, type AppraisalResult } from '../src/index.ts';
 
 const VECTORS = path.resolve(import.meta.dirname, '../../vectors');
 const verifier = new SnpVerifier();
 
-const BASELINE: AppraisalPolicy = { measurement: 'any', vmpl: 'any', products: ['Milan', 'Genoa', 'Turin'] };
+// Policies are built in the JSON form (SPEC §5) so that every port runs the vectors through its JSON loader.
+type Json = Record<string, unknown>;
+const BASELINE: Json = { measurement: 'any', vmpl: 'any', products: ['Milan', 'Genoa', 'Turin'] };
 // Mirrors the "hardened" expectations encoded by the synthetic fixtures (SPEC §3.7.1 defaults + DECIDE-LATER probes).
-const HARDENED: AppraisalPolicy = {
+const HARDENED: Json = {
   ...BASELINE,
   allowMaskedChipId: true,
   minTcb: { Genoa: { snp: 14 } },
@@ -21,7 +23,7 @@ const HARDENED: AppraisalPolicy = {
   platformInfo: { tsmeEnabled: 'required' },
 };
 // The 27x probes encode the DECIDE-LATER hardened stance that the rest of the synthetic suite does not satisfy.
-const HARDENED_PLATFORM: AppraisalPolicy['platformInfo'] = { tsmeEnabled: 'required', eccEnabled: 'required', raplDisabled: 'required', ciphertextHidingEnabled: 'required', aliasCheckComplete: 'required', tioEnabled: 'required' };
+const HARDENED_PLATFORM: Json = { tsmeEnabled: 'required', eccEnabled: 'required', raplDisabled: 'required', ciphertextHidingEnabled: 'required', aliasCheckComplete: 'required', tioEnabled: 'required' };
 
 /** Our code -> Tinfoil taxonomy, so vectors that name a code can be asserted. */
 function tinfoilCode(r: AppraisalResult & { ok: false }): string {
@@ -56,20 +58,21 @@ for (const name of fs.readdirSync(sevDir).filter(n => /^\d/.test(n)).sort()) {
     const report = new Uint8Array(zlib.gunzipSync(fromBase64(input.attestation_doc_b64)));
     const synthetic = input.amd_root_ca_pem !== undefined;
     const pol = input.policy ?? {};
-    const policy: AppraisalPolicy = {
+    const json: Json = {
       ...(synthetic ? HARDENED : BASELINE),
       ...(/^27[0-4]/.test(name) && { platformInfo: HARDENED_PLATFORM }),
-      ...(pol.expected_measurement_hex && { measurement: [fromHex(pol.expected_measurement_hex)] }),
-      ...(pol.expected_report_data_hex && { reportData: { kind: 'exact' as const, value: fromHex(pol.expected_report_data_hex) } }),
-      ...(pol.expected_host_data_hex && { hostData: fromHex(pol.expected_host_data_hex) }),
+      ...(pol.expected_measurement_hex && { measurement: [pol.expected_measurement_hex] }),
+      ...(pol.expected_report_data_hex && { reportData: { kind: 'exact', value: pol.expected_report_data_hex } }),
+      ...(pol.expected_host_data_hex && { hostData: pol.expected_host_data_hex }),
       ...((pol.expected_id_key_digest_hex || pol.expected_author_key_digest_hex) && {
-        idBlock: pol.expected_id_key_digest_hex ? { idKeyDigest: fromHex(pol.expected_id_key_digest_hex), authorKeyDigest: pol.expected_author_key_digest_hex && fromHex(pol.expected_author_key_digest_hex) } : 'any' as const }),
+        idBlock: { idKeyDigest: pol.expected_id_key_digest_hex ?? '00'.repeat(48), authorKeyDigest: pol.expected_author_key_digest_hex } }),
     };
-    if (pol.expected_author_key_digest_hex && !pol.expected_id_key_digest_hex) policy.idBlock = { idKeyDigest: new Uint8Array(48), authorKeyDigest: fromHex(pol.expected_author_key_digest_hex) };
     if (pol.min_tcb_bl_spl !== undefined || pol.min_tcb_ucode_spl !== undefined || pol.min_tcb_snp_spl !== undefined || pol.min_tcb_tee_spl !== undefined) {
       const f = { bootloader: pol.min_tcb_bl_spl, tee: pol.min_tcb_tee_spl, snp: pol.min_tcb_snp_spl, microcode: pol.min_tcb_ucode_spl };
-      policy.minTcb = { Milan: f, Genoa: f, Turin: f };
+      json.minTcb = { Milan: f, Genoa: f, Turin: f };
     }
+    const policy = appraisalPolicyFromJson(JSON.stringify(json)) as AppraisalPolicy;
+    assert.ok(!('code' in policy), `policy: ${JSON.stringify(policy)}`);
     const verifierHere = synthetic ? new SnpVerifier({ trustedArks: [pemToDer(input.amd_root_ca_pem)[0]] }) : verifier;
     const result = await verifierHere.appraise({
       evidence: report, endorsements: {
@@ -105,7 +108,7 @@ for (const file of fs.readdirSync(v3Dir).filter(n => n.endsWith('.json')).sort()
     const ark = pemToDer(vec.input.amd_root_ca_pem)[0];
     const result = await new SnpVerifier({ trustedArks: [ark] }).appraise({
       evidence: fromBase64(doc.cpu_evidence.report_base64), endorsements: { vcek: fromBase64(vcekB64), ask: chain[0], ark: chain[1], crl: fromBase64(crlB64) },
-      now: Math.floor(Date.now() / 1000), policy: { ...BASELINE, requireCrl: true, minReportVersion: 3 },
+      now: Math.floor(Date.now() / 1000), policy: appraisalPolicyFromJson({ ...BASELINE, requireCrl: true, minReportVersion: 3 }) as AppraisalPolicy,
     });
     // This older synthetic happy vector has a v3 CRL issuer without keyUsage.
     // RFC 10007 requires cRLSign, so the hardened verifier must reject it.

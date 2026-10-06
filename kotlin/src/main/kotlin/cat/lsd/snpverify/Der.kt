@@ -79,6 +79,7 @@ internal fun oidToString(b: ByteArray, t: Tlv): String {
     val parts = ArrayList<Long>()
     var v = 0L
     for (x in c) {
+        if (v >= 1L shl 56) fail(ErrorCode.CERT_MALFORMED, "DER: OID arc too large")
         v = v * 128 + (x.toInt() and 0x7f)
         if (x.toInt() and 0x80 == 0) {
             if (parts.isEmpty()) {
@@ -242,6 +243,7 @@ private fun parseName(b: ByteArray, name: Tlv): Name {
 
 private fun bitStringContent(b: ByteArray, t: Tlv): ByteArray {
     expect(t, Tag.BIT_STRING, "BIT STRING")
+    if (t.end == t.start) fail(ErrorCode.CERT_MALFORMED, "DER: BIT STRING is empty")
     if (b[t.start].toInt() != 0) fail(ErrorCode.CERT_MALFORMED, "BIT STRING with unused bits")
     return b.copyOfRange(t.start + 1, t.end)
 }
@@ -254,7 +256,9 @@ private fun parseExtensions(b: ByteArray, extsSeq: Tlv): Map<String, Extension> 
         var critical = false;
         var i = 1
         if (parts[i].tag == Tag.BOOLEAN) {
-            critical = content(b, parts[i])[0].toInt() != 0;
+            val flag = content(b, parts[i])
+            if (flag.size != 1) fail(ErrorCode.CERT_MALFORMED, "DER: extension critical flag must be one byte")
+            critical = flag[0].toInt() != 0
             i++
         }
         val value = content(b, expect(parts[i], Tag.OCTET_STRING, "extnValue"))

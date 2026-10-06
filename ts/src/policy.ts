@@ -51,9 +51,10 @@ export type ResolvedAppraisalPolicy = Required<Omit<AppraisalPolicy, 'hostData' 
 
 class Invalid extends Error {}
 const need = (cond: boolean, msg: string) => { if (!cond) throw new Invalid(msg); };
+const isObject = (v: unknown): v is object => v !== null && typeof v === 'object' && !Array.isArray(v);
 const len = (v: Uint8Array | undefined, n: number, what: string) => need(v === undefined || (v instanceof Uint8Array && v.length === n), `policy.${what} must be ${n} bytes`);
 const requiredLen = (v: unknown, n: number, what: string) => need(v instanceof Uint8Array && v.length === n, `policy.${what} must be ${n} bytes`);
-const keys = (v: object, allowed: readonly string[], what: string) => need(Object.keys(v).every(k => allowed.includes(k)), `policy.${what} has unknown fields`);
+const keys = (v: object, allowed: readonly string[], what: string) => need(Object.keys(v).every(k => allowed.includes(k)), `policy${what && '.' + what} has unknown fields`);
 const uint = (v: number | undefined, max: number, what: string) => need(v === undefined || (Number.isInteger(v) && v >= 0 && v <= max), `policy.${what} must be an integer in 0..${max}`);
 const bool = (v: boolean | undefined, what: string) => need(v === undefined || typeof v === 'boolean', `policy.${what} must be boolean`);
 const bits = (v: object, names: readonly string[], what: string) => {
@@ -71,12 +72,12 @@ const POLICY_KEYS = [
 /** Fill defaults and validate shapes. A malformed policy yields a POLICY_INVALID violation. */
 export function resolveAppraisalPolicy(p: AppraisalPolicy): ResolvedAppraisalPolicy | Violation {
   try {
-    need(p !== null && typeof p === 'object' && !Array.isArray(p), 'policy must be an object');
+    need(isObject(p), 'policy must be an object');
     keys(p, POLICY_KEYS, '');
     need(p.measurement !== undefined, 'policy.measurement is required: an allowlist or the explicit string "any"');
     if (p.measurement !== 'any') { need(Array.isArray(p.measurement) && p.measurement.length > 0, 'policy.measurement must be a nonempty array or "any"'); for (const m of p.measurement) requiredLen(m, 48, 'measurement[]'); }
     if (p.reportData !== undefined) {
-      need(p.reportData !== null && typeof p.reportData === 'object', 'policy.reportData must be an object');
+      need(isObject(p.reportData), 'policy.reportData must be an object');
       need(['any', 'exact', 'prefix'].includes(p.reportData.kind), 'policy.reportData.kind is invalid');
       keys(p.reportData, p.reportData.kind === 'any' ? ['kind'] : ['kind','value'], 'reportData');
       if (p.reportData.kind !== 'any') {
@@ -94,7 +95,7 @@ export function resolveAppraisalPolicy(p: AppraisalPolicy): ResolvedAppraisalPol
     for (const f of p.endorsementKeyFingerprints ?? []) requiredLen(f, 32, 'endorsementKeyFingerprints[]');
     if (p.cspIds !== undefined) need(Array.isArray(p.cspIds) && p.cspIds.length > 0 && p.cspIds.every(x => typeof x === 'string' && x.length > 0), 'policy.cspIds must be nonempty strings');
     if (p.idBlock !== undefined) {
-      need(p.idBlock === 'forbid' || p.idBlock === 'any' || (p.idBlock !== null && typeof p.idBlock === 'object'), 'policy.idBlock is invalid');
+      need(p.idBlock === 'forbid' || p.idBlock === 'any' || isObject(p.idBlock), 'policy.idBlock is invalid');
       if (typeof p.idBlock === 'object') {
         keys(p.idBlock, ['idKeyDigest', 'authorKeyDigest'], 'idBlock');
         need(p.idBlock.idKeyDigest !== undefined, 'policy.idBlock.idKeyDigest is required');
@@ -103,11 +104,11 @@ export function resolveAppraisalPolicy(p: AppraisalPolicy): ResolvedAppraisalPol
       }
     }
     if (p.guestPolicy !== undefined) {
-      need(p.guestPolicy !== null && typeof p.guestPolicy === 'object', 'policy.guestPolicy must be an object');
+      need(isObject(p.guestPolicy), 'policy.guestPolicy must be an object');
       bits(p.guestPolicy, ['debug','migrateMa','smt','singleSocket','cxlAllowed','memAes256Xts','raplDisabled','ciphertextHidingDram','pageSwapDisabled','minAbi'], 'guestPolicy');
       if (p.guestPolicy.minAbi !== undefined) {
         const abi = p.guestPolicy.minAbi;
-        need(abi !== null && typeof abi === 'object', 'policy.guestPolicy.minAbi must be an object');
+        need(isObject(abi), 'policy.guestPolicy.minAbi must be an object');
         keys(abi, ['major', 'minor'], 'guestPolicy.minAbi');
         need(abi.major !== undefined && abi.minor !== undefined, 'policy.guestPolicy.minAbi requires major and minor');
         uint(abi.major, 255, 'guestPolicy.minAbi.major');
@@ -115,25 +116,25 @@ export function resolveAppraisalPolicy(p: AppraisalPolicy): ResolvedAppraisalPol
       }
     }
     if (p.platformInfo !== undefined) {
-      need(p.platformInfo !== null && typeof p.platformInfo === 'object', 'policy.platformInfo must be an object');
+      need(isObject(p.platformInfo), 'policy.platformInfo must be an object');
       bits(p.platformInfo, ['smtEnabled','tsmeEnabled','eccEnabled','raplDisabled','ciphertextHidingEnabled','aliasCheckComplete','iommuWriteSafe','tioEnabled','allowUnknownBits'], 'platformInfo');
       bool(p.platformInfo.allowUnknownBits, 'platformInfo.allowUnknownBits');
     }
     if (typeof p.vmpl === 'number') need(Number.isInteger(p.vmpl) && p.vmpl >= 0 && p.vmpl <= 3, 'policy.vmpl must be 0..3');
     else need(p.vmpl === undefined || p.vmpl === 'any', 'policy.vmpl must be 0..3 or any');
-    uint(p.minReportVersion, 5, 'minReportVersion'); need(p.minReportVersion === undefined || p.minReportVersion >= 2, 'policy.minReportVersion must be 2..5');
+    need(p.minReportVersion === undefined || (Number.isInteger(p.minReportVersion) && p.minReportVersion >= 2 && p.minReportVersion <= 5), 'policy.minReportVersion must be 2..5');
     uint(p.minGuestSvn, 0xffffffff, 'minGuestSvn');
     for (const [what, table] of [['minTcb', p.minTcb], ['minLaunchTcb', p.minLaunchTcb]] as const) if (table !== undefined) {
-      need(table !== null && typeof table === 'object' && !Array.isArray(table), `policy.${what} must be an object`);
+      need(isObject(table), `policy.${what} must be an object`);
       keys(table, PRODUCT_NAMES, what);
       for (const [product, floor] of Object.entries(table)) {
-        need(floor !== null && typeof floor === 'object' && !Array.isArray(floor), `policy.${what}.${product} must be an object`);
+        need(isObject(floor), `policy.${what}.${product} must be an object`);
         keys(floor, ['bootloader','tee','snp','microcode','fmc'], `${what}.${product}`);
         for (const [k, x] of Object.entries(floor)) uint(x as number, 255, `${what}.${product}.${k}`);
       }
     }
     if (p.minFirmware !== undefined) {
-      need(p.minFirmware !== null && typeof p.minFirmware === 'object', 'policy.minFirmware must be an object');
+      need(isObject(p.minFirmware), 'policy.minFirmware must be an object');
       keys(p.minFirmware, ['major', 'minor', 'build'], 'minFirmware');
       for (const [k, x] of Object.entries(p.minFirmware)) {
         need(x !== undefined, `policy.minFirmware.${k} cannot be undefined`);

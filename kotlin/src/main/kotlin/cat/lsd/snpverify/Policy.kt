@@ -107,8 +107,8 @@ data class ResolvedAppraisalPolicy(
     val idBlock: IdBlockPin,
 )
 
-private class Invalid(msg: String) : Exception(msg)
-private fun need(cond: Boolean, msg: String) {
+internal class Invalid(msg: String) : Exception(msg)
+internal fun need(cond: Boolean, msg: String) {
     if (!cond) throw Invalid(msg)
 }
 private fun len(v: ByteArray?, n: Int, what: String) = need(v == null || v.size == n, "policy.$what must be $n bytes")
@@ -116,7 +116,7 @@ private fun len(v: ByteArray?, n: Int, what: String) = need(v == null || v.size 
 /** Fill defaults and validate shapes. Returns Result.Err(POLICY_INVALID) on a malformed policy. */
 fun resolveAppraisalPolicy(p: AppraisalPolicy): Result<ResolvedAppraisalPolicy> = try {
     (p.measurement as? MeasurementPin.Allowlist)?.let {
-        need(it.values.isNotEmpty(), "policy.measurement must be a nonempty allowlist or Any");
+        need(it.values.isNotEmpty(), "policy.measurement must be a nonempty array or \"any\"");
         it.values.forEach { m -> len(m, 48, "measurement[]") }
     }
     when (val rd = p.reportData) {
@@ -136,9 +136,9 @@ fun resolveAppraisalPolicy(p: AppraisalPolicy): Result<ResolvedAppraisalPolicy> 
     }
     p.vmpl?.let { need(it in 0..3, "policy.vmpl must be 0..3") }
     p.cspIds?.let { need(it.isNotEmpty() && it.all(String::isNotEmpty), "policy.cspIds must be nonempty strings") }
-    p.products?.let { need(it.isNotEmpty(), "policy.products must be nonempty") }
+    p.products?.let { need(it.isNotEmpty(), "policy.products must be a nonempty Product list") }
     p.minReportVersion?.let { need(it in 2..5, "policy.minReportVersion must be 2..5") }
-    p.minGuestSvn?.let { need(it in 0..0xffffffffL, "policy.minGuestSvn must be uint32") }
+    p.minGuestSvn?.let { need(it in 0..0xffffffffL, "policy.minGuestSvn must be an integer in 0..4294967295") }
     p.guestPolicy?.minAbi?.let { need(it.first in 0..255 && it.second in 0..255, "policy.guestPolicy.minAbi must be byte values") }
     for ((name, table) in listOf("minTcb" to p.minTcb, "minLaunchTcb" to p.minLaunchTcb)) {
         table?.forEach { (product, floor) ->

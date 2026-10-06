@@ -66,7 +66,8 @@ The constructor takes the cryptographic provider and the trust anchors. `apprais
 piece of Evidence, its Endorsements, the appraisal time and the appraisal policy. The five stages
 are also callable on their own: `parseReport`, `verifyChain`, `bindEndorsement`,
 `verifyReportSignature` and `checkAppraisalPolicy`, with `resolveAppraisalPolicy` filling policy
-defaults. The parse, chain, bind and
+defaults. `appraisalPolicyFromJson` reads the JSON form of a policy (§5) and
+`appraisalPolicyToJson` writes the JSON form of a resolved policy. The parse, chain, bind and
 signature stages return the first violation found. The policy stage returns all violations.
 
 ## 4. Providers
@@ -122,6 +123,19 @@ AppraisalPolicy {
 TcbFloor { bootloader?, tee?, snp?, microcode?, fmc?: int }   // absent = unconstrained
 ```
 
+**JSON form.** A policy is also a JSON document with the keys above, in the encoding `toJson()`
+uses for `attestationResult.appraisalPolicy` (§6): byte values as lowercase hexadecimal strings,
+`minLaunchMitVector` and `minCurrentMitVector` as decimal strings, `Bit`, `vmpl: "any"`,
+`signingKey`, `measurement: "any"` and `idBlock: "forbid" | "any"` as strings, `products` and
+`minTcb` keys as product names. A `"$comment"` key is permitted in any object and ignored. Absent
+keys take the defaults; unknown keys, wrong types and out-of-range values are `POLICY_INVALID`,
+with the same message in every port. `appraisalPolicyToJson(resolveAppraisalPolicy(p))` is itself
+a valid document that resolves to the same policy. Documents must be strict JSON without duplicate
+keys; the ports' JSON parsers differ only outside that (org.json accepts a superset and, on the
+JVM, rejects duplicate keys). `vectors/policy.json` pins accepted documents
+with their resolved form and rejected documents with their message; MITIGATIONS.md carries a
+complete document.
+
 `reportData` carries the freshness and session binding. With `exact` or `prefix`, the Evidence must
 contain the value the Verifier expects, for example a hash of a nonce chosen for this appraisal and
 the Attester's channel key. With `any`, the Evidence may have been produced for another session. An
@@ -151,8 +165,8 @@ AttestationResult {
 CHIP_ID identifies the physical chip. REPORT_ID identifies the virtual machine instance; it is
 constant for the life of one boot and differs between boots. `reportSha256` is the SHA-256 of the
 1184 report bytes. `toJson()` renders byte arrays as lowercase hexadecimal, 64-bit raw values as
-decimal strings, and enumerations as strings; `Bit` values are lowercase. Both implementations
-produce the same JSON for the same input.
+decimal strings, and enumerations as strings; `Bit` values are lowercase. Every port produces the
+same JSON for the same input.
 
 ## 7. Error codes (closed set)
 
@@ -223,9 +237,13 @@ Each port runs:
   in `vectors/review/`;
 - the cross-port golden result `vectors/golden/real-genoa.json`;
 - the cross-port violation vector `vectors/expected-violations.json` (stage, code, field and
-  message for twenty rejections).
+  message for twenty rejections);
+- the cross-port policy vector `vectors/policy.json` (JSON policies with their resolved form, or
+  the `POLICY_INVALID` message). The conformance vectors are run with policies built in the JSON
+  form, so the loader is exercised by every port.
 
-The TypeScript tests write the regression fixtures, the golden result and the violation vector when
+The TypeScript tests write the regression fixtures, the golden result, the violation vector and
+the policy vector when
 the files are absent, or when the environment variable `SNP_VECTORS_REGEN` is set. `vectors/kds/`
 is a snapshot of the AMD Key Distribution Service certificate chains and CRLs taken on
 2026-10-04. `ts/scripts/fetch-roots.mjs` regenerates the embedded root certificates from the

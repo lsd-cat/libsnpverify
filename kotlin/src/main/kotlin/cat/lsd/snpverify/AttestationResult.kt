@@ -140,72 +140,73 @@ fun toJson(a: AttestationResult): Map<String, Any?> = mapOf(
         "ark" to certJson(a.endorsements.ark),
         "crl" to a.endorsements.crl?.let { mapOf("thisUpdate" to it.thisUpdate, "nextUpdate" to it.nextUpdate, "revokedCount" to it.revokedCount) },
     ),
-    "appraisalPolicy" to a.appraisalPolicy.let { p ->
+    "appraisalPolicy" to appraisalPolicyToJson(a.appraisalPolicy),
+    "appraisedAt" to a.appraisedAt,
+).filterNullsDeep()
+
+/** The JSON form of a resolved policy; [appraisalPolicyFromJson] reads it back. */
+fun appraisalPolicyToJson(p: ResolvedAppraisalPolicy): Map<String, Any?> = mapOf(
+    "products" to p.products.map { it.name },
+    "signingKey" to (if (p.signingKey == SigningKeyPolicy.ANY) "any" else p.signingKey.name),
+    "allowMaskedChipId" to p.allowMaskedChipId,
+    "chipIds" to p.chipIds?.map { it.hex() },
+    "endorsementKeyFingerprints" to p.endorsementKeyFingerprints?.map { it.hex() },
+    "cspIds" to p.cspIds,
+    "requireCrl" to p.requireCrl,
+    "guestPolicy" to p.guestPolicy.let { g ->
         mapOf(
-            "products" to p.products.map { it.name },
-            "signingKey" to (if (p.signingKey == SigningKeyPolicy.ANY) "any" else p.signingKey.name),
-            "allowMaskedChipId" to p.allowMaskedChipId,
-            "chipIds" to p.chipIds?.map { it.hex() },
-            "endorsementKeyFingerprints" to p.endorsementKeyFingerprints?.map { it.hex() },
-            "cspIds" to p.cspIds,
-            "requireCrl" to p.requireCrl,
-            "guestPolicy" to p.guestPolicy.let { g ->
-                mapOf(
-                    "debug" to bitJson(g.debug),
-                    "migrateMa" to bitJson(g.migrateMa),
-                    "smt" to bitJson(g.smt),
-                    "singleSocket" to bitJson(g.singleSocket),
-                    "cxlAllowed" to bitJson(g.cxlAllowed),
-                    "memAes256Xts" to bitJson(g.memAes256Xts),
-                    "raplDisabled" to bitJson(g.raplDisabled),
-                    "ciphertextHidingDram" to bitJson(g.ciphertextHidingDram),
-                    "pageSwapDisabled" to bitJson(g.pageSwapDisabled),
-                    "minAbi" to g.minAbi?.let { mapOf("major" to it.first, "minor" to it.second) },
-                )
-            },
-            "platformInfo" to p.platformInfo.let { q ->
-                mapOf(
-                    "smtEnabled" to bitJson(q.smtEnabled),
-                    "tsmeEnabled" to bitJson(q.tsmeEnabled),
-                    "eccEnabled" to bitJson(q.eccEnabled),
-                    "raplDisabled" to bitJson(q.raplDisabled),
-                    "ciphertextHidingEnabled" to bitJson(q.ciphertextHidingEnabled),
-                    "aliasCheckComplete" to bitJson(q.aliasCheckComplete),
-                    "iommuWriteSafe" to bitJson(q.iommuWriteSafe),
-                    "tioEnabled" to bitJson(q.tioEnabled),
-                    "allowUnknownBits" to q.allowUnknownBits,
-                )
-            },
-            "vmpl" to (p.vmpl ?: "any"),
-            "minReportVersion" to p.minReportVersion,
-            "minGuestSvn" to p.minGuestSvn,
-            "minTcb" to p.minTcb.entries.associate { (k, v) -> k.name to floorJson(v) },
-            "minLaunchTcb" to p.minLaunchTcb.entries.associate { (k, v) -> k.name to floorJson(v) },
-            "minFirmware" to fwJson(p.minFirmware),
-            "allowProvisionalFirmware" to p.allowProvisionalFirmware,
-            "minLaunchMitVector" to p.minLaunchMitVector?.toString(),
-            "minCurrentMitVector" to p.minCurrentMitVector?.toString(),
-            "measurement" to when (val m = p.measurement) {
-                is MeasurementPin.Allowlist -> m.values.map { it.hex() };
-                MeasurementPin.Any -> "any"
-            },
-            "reportData" to when (val r = p.reportData) {
-                is ReportDataPin.Exact -> mapOf("kind" to "exact", "value" to r.value.hex())
-                is ReportDataPin.Prefix -> mapOf("kind" to "prefix", "value" to r.value.hex())
-                ReportDataPin.Any -> mapOf("kind" to "any")
-            },
-            "hostData" to p.hostData?.hex(),
-            "familyId" to p.familyId?.hex(),
-            "imageId" to p.imageId?.hex(),
-            "reportId" to p.reportId?.hex(),
-            "idBlock" to when (val i = p.idBlock) {
-                IdBlockPin.Forbid -> "forbid"
-                IdBlockPin.Any -> "any"
-                is IdBlockPin.Pinned -> mapOf("idKeyDigest" to i.idKeyDigest.hex(), "authorKeyDigest" to i.authorKeyDigest?.hex())
-            },
+            "debug" to bitJson(g.debug),
+            "migrateMa" to bitJson(g.migrateMa),
+            "smt" to bitJson(g.smt),
+            "singleSocket" to bitJson(g.singleSocket),
+            "cxlAllowed" to bitJson(g.cxlAllowed),
+            "memAes256Xts" to bitJson(g.memAes256Xts),
+            "raplDisabled" to bitJson(g.raplDisabled),
+            "ciphertextHidingDram" to bitJson(g.ciphertextHidingDram),
+            "pageSwapDisabled" to bitJson(g.pageSwapDisabled),
+            "minAbi" to g.minAbi?.let { mapOf("major" to it.first, "minor" to it.second) },
         )
     },
-    "appraisedAt" to a.appraisedAt,
+    "platformInfo" to p.platformInfo.let { q ->
+        mapOf(
+            "smtEnabled" to bitJson(q.smtEnabled),
+            "tsmeEnabled" to bitJson(q.tsmeEnabled),
+            "eccEnabled" to bitJson(q.eccEnabled),
+            "raplDisabled" to bitJson(q.raplDisabled),
+            "ciphertextHidingEnabled" to bitJson(q.ciphertextHidingEnabled),
+            "aliasCheckComplete" to bitJson(q.aliasCheckComplete),
+            "iommuWriteSafe" to bitJson(q.iommuWriteSafe),
+            "tioEnabled" to bitJson(q.tioEnabled),
+            "allowUnknownBits" to q.allowUnknownBits,
+        )
+    },
+    "vmpl" to (p.vmpl ?: "any"),
+    "minReportVersion" to p.minReportVersion,
+    "minGuestSvn" to p.minGuestSvn,
+    "minTcb" to p.minTcb.entries.associate { (k, v) -> k.name to floorJson(v) },
+    "minLaunchTcb" to p.minLaunchTcb.entries.associate { (k, v) -> k.name to floorJson(v) },
+    "minFirmware" to fwJson(p.minFirmware),
+    "allowProvisionalFirmware" to p.allowProvisionalFirmware,
+    "minLaunchMitVector" to p.minLaunchMitVector?.toString(),
+    "minCurrentMitVector" to p.minCurrentMitVector?.toString(),
+    "measurement" to when (val m = p.measurement) {
+        is MeasurementPin.Allowlist -> m.values.map { it.hex() };
+        MeasurementPin.Any -> "any"
+    },
+    "reportData" to when (val r = p.reportData) {
+        is ReportDataPin.Exact -> mapOf("kind" to "exact", "value" to r.value.hex())
+        is ReportDataPin.Prefix -> mapOf("kind" to "prefix", "value" to r.value.hex())
+        ReportDataPin.Any -> mapOf("kind" to "any")
+    },
+    "hostData" to p.hostData?.hex(),
+    "familyId" to p.familyId?.hex(),
+    "imageId" to p.imageId?.hex(),
+    "reportId" to p.reportId?.hex(),
+    "idBlock" to when (val i = p.idBlock) {
+        IdBlockPin.Forbid -> "forbid"
+        IdBlockPin.Any -> "any"
+        is IdBlockPin.Pinned -> mapOf("idKeyDigest" to i.idKeyDigest.hex(), "authorKeyDigest" to i.authorKeyDigest?.hex())
+    },
 ).filterNullsDeep()
 
 private fun bitJson(b: Bit?) = b?.name?.lowercase()

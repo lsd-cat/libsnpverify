@@ -49,7 +49,9 @@ publishing {
 }
 
 dependencies {
-    // Main: zero dependencies. JCA only.
+    // Main: JCA for crypto; org.json for the JSON policy form. Android ships its own org.json, and the Android Gradle
+    // plugin drops this artifact in favour of the platform copy, so only the API common to both is used.
+    implementation("org.json:json:20250517")
     testImplementation(kotlin("test"))
     testImplementation("com.google.code.gson:gson:2.11.0")
     testImplementation("org.bouncycastle:bcprov-jdk18on:1.78.1") // exercises the pluggable provider path
