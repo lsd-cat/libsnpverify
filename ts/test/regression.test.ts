@@ -6,7 +6,7 @@ import zlib from 'node:zlib';
 import { constants, generateKeyPairSync, sign, type KeyObject } from 'node:crypto';
 import {
   SnpVerifier, baseVcekAppraisalPolicy, baseVlekAppraisalPolicy, fromBase64, fromHex, pemToDer, parseCrl, parseCertificate,
-  webCrypto, type AppraisalPolicy, type AppraisalInput,
+  webCrypto, type AppraisalPolicy, type AppraisalInput, type Violation,
 } from '../src/index.ts';
 import { readTlv, children, raw, oidToString } from '../src/der.ts';
 
@@ -212,6 +212,15 @@ test('R7: requireCrl rejects a CRL without expiry', async () => {
   assert.equal(r.violations[0].code, 'CRL_INVALID');
 });
 
+test('DER strictness: empty BIT STRING, empty BOOLEAN and oversized OID arc are CERT_MALFORMED', () => {
+  const expectMalformed = (file: string, message: string) => {
+    try { parseCertificate(read(`review/${file}`)); assert.fail(file); } catch (e) { assert.equal((e as { violation: Violation }).violation?.message, message, file); }
+  };
+  expectMalformed('empty-bit-string.der', 'DER: BIT STRING is empty');
+  expectMalformed('empty-boolean.der', 'DER: extension critical flag must be one byte');
+  expectMalformed('long-oid.der', 'DER: OID arc too large');
+});
+
 test('P1: VCEK base policy accepts the pinned fixture and rejects missing CRL', async () => {
   const i = fixture();
   i.endorsements.crl = new Uint8Array(read('kds/Genoa.crl'));
@@ -301,8 +310,8 @@ if (process.env.SNP_VECTORS_REGEN || !fs.existsSync(`${reviewDir}/root.der`)) {
   fs.writeFileSync(`${dir}/vlek-root.der`, vlek.endorsements.ark!);
   fs.writeFileSync(`${dir}/asvk.der`, vlek.endorsements.ask!);
   fs.writeFileSync(`${dir}/vlek.der`, vlek.endorsements.vcek);
-  fs.writeFileSync(`${dir}/vlek.endorsements.crl`, vlek.endorsements.crl!);
-  fs.writeFileSync(`${dir}/vlek.evidence`, vlek.evidence);
+  fs.writeFileSync(`${dir}/vlek.crl`, vlek.endorsements.crl!);
+  fs.writeFileSync(`${dir}/vlek.report`, vlek.evidence);
   { // R4: vector 267 with MASK_CHIP_KEY cleared and re-signed by the synthetic VCEK key (CHIP_ID stays zero)
     const i = fixture('267-mask-chip-id-accept');
     i.evidence[0x48] &= ~2;
@@ -310,6 +319,17 @@ if (process.env.SNP_VECTORS_REGEN || !fs.existsSync(`${reviewDir}/root.der`)) {
     i.evidence.set(Uint8Array.from(sig.subarray(0, 48)).reverse(), 0x2a0);
     i.evidence.set(Uint8Array.from(sig.subarray(48)).reverse(), 0x2e8);
     fs.writeFileSync(`${dir}/masked-resigned.report`, i.evidence);
+  }
+  { // DER strictness: malformed certificates derived from the ARK, parsed by every port (scripts/gen-malformed.mjs)
+    const [tbsT, algT, sigT] = kids(rootTemplate);
+    fs.writeFileSync(`${dir}/empty-bit-string.der`, seq(tbsT, algT, fromHex('0300')));
+    const f = kids(tbsT);
+    const exts = kids(kids(f[7])[0]);
+    const [oid, ...rest] = kids(exts[0]);
+    exts[0] = seq(oid, fromHex('0100'), rest[rest.length - 1]);
+    f[7] = tlv(0xa3, seq(...exts));
+    fs.writeFileSync(`${dir}/empty-boolean.der`, seq(seq(...f), algT, sigT));
+    fs.writeFileSync(`${dir}/long-oid.der`, seq(tbsT, seq(tlv(6, fromHex('2a' + '81'.repeat(12) + '00'))), sigT));
   }
   { // R6: test-chain leaf with a signed unknown critical extension
     const fields = kids(kids(fixture().endorsements.vcek)[0]);

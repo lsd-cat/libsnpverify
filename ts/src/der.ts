@@ -56,6 +56,7 @@ export function oidToString(b: Uint8Array, t: Tlv): string {
   const parts: number[] = [];
   let v = 0;
   for (let i = 0; i < c.length; i++) {
+    if (v >= 2 ** 56) fail('CERT_MALFORMED', 'DER: OID arc too large');
     v = v * 128 + (c[i] & 0x7f);
     if (!(c[i] & 0x80)) {
       if (parts.length === 0) { parts.push(Math.min(2, Math.floor(v / 40)), v - 40 * Math.min(2, Math.floor(v / 40))); }
@@ -197,6 +198,7 @@ function parseName(b: Uint8Array, name: Tlv): Name {
 
 function bitStringContent(b: Uint8Array, t: Tlv): Uint8Array {
   expect(t, TAG.BIT_STRING, 'BIT STRING');
+  if (t.end === t.start) fail('CERT_MALFORMED', 'DER: BIT STRING is empty');
   if (b[t.start] !== 0) fail('CERT_MALFORMED', 'BIT STRING with unused bits');
   return b.subarray(t.start + 1, t.end);
 }
@@ -208,7 +210,11 @@ function parseExtensions(b: Uint8Array, extsSeq: Tlv): Map<string, Extension> {
     const oid = oidToString(b, parts[0]);
     let critical = false;
     let i = 1;
-    if (parts[i].tag === TAG.BOOLEAN) { critical = content(b, parts[i])[0] !== 0; i++; }
+    if (parts[i].tag === TAG.BOOLEAN) {
+      const flag = content(b, parts[i]);
+      if (flag.length !== 1) fail('CERT_MALFORMED', 'DER: extension critical flag must be one byte');
+      critical = flag[0] !== 0; i++;
+    }
     const value = content(b, expect(parts[i], TAG.OCTET_STRING, 'extnValue'));
     if (map.has(oid)) fail('CERT_MALFORMED', `duplicate extension ${oid}`);
     map.set(oid, { oid, critical, value });
